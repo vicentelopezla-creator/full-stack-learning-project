@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Prepare backend env
+        run: |
+          cp .env.example .env
+          python - <<'PY'
+          from pathlib import Path
+          env_path = Path(".env")
+          text = env_path.read_text(encoding="utf-8")
+          text = text.replace(
+              "postgresql://postgres:tu_password@localhost:5432/BACKEND",
+              "sqlite:///./ci.db",
+          )
+          env_path.write_text(text, encoding="utf-8")
+          PY
+      - name: Run backend tests
+        run: python run_tests.py
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: FRONTEND
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: FRONTEND/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Build frontend
+        run: npm run build
