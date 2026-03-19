@@ -1,4 +1,5 @@
-import type { Category, Course } from '../types/api';
+import type { Category } from '../types/category';
+import type { Course } from '../types/course';
 
 type CourseListProps = {
   courses: Course[];

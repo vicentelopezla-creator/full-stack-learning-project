@@ -38,6 +38,7 @@ npm run dev
 
 - Backend: [backend_explicacion.md](c:/App/VLANDA/projects_python/full-stack/BACKEND/backend_explicacion.md)
 - Frontend: [frontend_explicacion.md](c:/App/VLANDA/projects_python/full-stack/FRONTEND/frontend_explicacion.md)
+- Memoria operativa del proyecto: [PROJECT_MEMORY.md](c:/App/VLANDA/projects_python/full-stack/PROJECT_MEMORY.md)
 
 ## Flujo de trabajo recomendado
 

@@ -1,4 +1,4 @@
-import type { Category } from '../types/api';
+import type { Category } from '../types/category';
 
 type CategoryListProps = {
   categories: Category[];

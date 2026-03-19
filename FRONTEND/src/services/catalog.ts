@@ -1,5 +1,7 @@
 import { apiRequest } from '../lib/api';
-import type { Category, Course, HealthResponse } from '../types/api';
+import type { Category } from '../types/category';
+import type { Course } from '../types/course';
+import type { HealthResponse } from '../types/health';
 
 export function getHealth() {
   return apiRequest<HealthResponse>('/health');

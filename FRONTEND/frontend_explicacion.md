@@ -132,6 +132,14 @@ Aqui se coordina todo el flujo inicial:
 
 Se eligio centralizar la primera version aqui porque te permite entender el flujo completo sin repartir demasiada logica desde el principio.
 
+En el estado actual, `App.tsx` tambien cumple estas funciones:
+
+- renderiza el encabezado principal del sitio,
+- administra la categoria seleccionada,
+- ejecuta la busqueda de cursos en memoria,
+- calcula el contador del carrito cuando hay sesion,
+- compone el footer global.
+
 ### `src/styles.css`
 
 Contiene el estilo visual base del frontend.
@@ -146,6 +154,13 @@ La interfaz se diseno para que no se vea como una plantilla vacia:
 - estilo util tanto en escritorio como en movil.
 
 La intencion fue que desde el primer dia el proyecto se sienta como una aplicacion real.
+
+Despues se fue ampliando para cubrir:
+
+- encabezado global,
+- barra de acciones principal,
+- footer,
+- refinamiento responsive.
 
 ## 5. Carpeta `src/lib/`
 
@@ -192,26 +207,202 @@ Contiene funciones publicas para consultar:
 
 Esto prepara una base ordenada para seguir agregando servicios despues, por ejemplo carrito, ventas, videos o panel del alumno.
 
-## 7. Carpeta `src/types/`
+### `src/services/video.ts`
 
-### `src/types/api.ts`
+Contiene funciones para:
+
+- listar videos,
+- obtener un video por id,
+- crear videos,
+- actualizar videos,
+- eliminar videos,
+- subir archivos con `FormData`,
+- construir la URL del archivo de video.
+
+Se creo porque el modulo de videos tiene rutas propias y ademas una necesidad especial de subida de archivos.
+
+### `src/services/carrito.ts`
+
+Contiene funciones para:
+
+- listar el carrito del usuario,
+- agregar cursos al carrito.
+
+Se separo porque carrito es un dominio funcional distinto del catalogo.
+
+### `src/services/venta.ts`
+
+Contiene funciones para:
+
+- listar compras,
+- crear compras,
+- ejecutar checkout.
+
+Esto prepara el frontend para la capa comercial del proyecto.
+
+### `src/services/me.ts`
+
+Contiene funciones para:
+
+- listar cursos comprados por el alumno,
+- traer el contenido completo de un curso comprado.
+
+Este servicio representa el panel personal del usuario autenticado.
+
+### `src/services/checkbox.ts`
+
+Contiene funciones para leer y crear estados de progreso por video.
+
+### `src/services/commentary.ts`
+
+Contiene funciones para listar y crear comentarios.
+
+### `src/services/response.ts`
+
+Contiene funciones para listar y crear respuestas asociadas a comentarios.
+
+Paso a paso, cada servicio fue agregado siguiendo esta regla:
+
+1. mirar las rutas reales del backend,
+2. identificar el tipo TypeScript de entrada o salida,
+3. crear funciones pequeñas por endpoint,
+4. mantener los componentes libres de llamadas HTTP directas.
+
+## 7. Carpeta `src/types/`
 
 Aqui se definieron tipos TypeScript inspirados en los esquemas del backend.
 
-Se crearon tipos para:
+La decision actual fue separar los modelos por dominio, en lugar de dejarlos todos en un solo archivo. Esto hace que el proyecto escale mejor y facilita encontrar rapidamente cada estructura.
 
+### `src/types/user.ts`
+
+Contiene los modelos de usuario:
+
+- `UserBase`
+- `UserCreate`
 - `User`
+
+Se usan para diferenciar:
+
+- datos base del usuario,
+- datos necesarios para registro,
+- datos completos que devuelve la API.
+
+### `src/types/auth.ts`
+
+Contiene:
+
 - `LoginRequest`
 - `LoginResponse`
+
+Separa claramente lo que el frontend envia al autenticar y lo que recibe de vuelta.
+
+### `src/types/category.ts`
+
+Contiene:
+
+- `CategoryCreate`
+- `CategoryUpdate`
 - `Category`
+
+Esto refleja que una misma entidad puede tener distintas formas segun si se crea, se actualiza o se muestra.
+
+### `src/types/course.ts`
+
+Contiene:
+
+- `CourseBase`
+- `CourseCreate`
+- `CourseUpdate`
 - `Course`
+
+Se creo asi para reflejar los esquemas del backend y preparar el frontend para formularios de creacion y edicion.
+
+### `src/types/video.ts`
+
+Contiene:
+
+- `VideoCreate`
+- `VideoUpdate`
+- `Video`
+
+Es la representacion del contenido audiovisual de los cursos.
+
+### `src/types/carrito.ts`
+
+Contiene:
+
+- `CarritoCreate`
+- `Carrito`
+
+Se separa el payload de creacion del objeto completo que responde la API.
+
+### `src/types/venta.ts`
+
+Contiene:
+
+- `VentaCreate`
+- `Venta`
+- `CheckoutResult`
+
+Sirve tanto para la compra directa como para el resultado del checkout.
+
+### `src/types/checkbox.ts`
+
+Contiene:
+
+- `CheckboxCreate`
+- `Checkbox`
+
+Representa el estado de progreso por video.
+
+### `src/types/commentary.ts`
+
+Contiene:
+
+- `CommentaryCreate`
+- `Commentary`
+
+Prepara el frontend para comentarios del curso o del video.
+
+### `src/types/response.ts`
+
+Contiene:
+
+- `ResponseCreate`
+- `Response`
+
+Representa respuestas asociadas a comentarios.
+
+### `src/types/me.ts`
+
+Contiene:
+
+- `PurchasedCourse`
+- `VideoProgress`
+- `CourseContent`
+
+Estos son modelos compuestos pensados para el panel del alumno y consumo de contenido comprado.
+
+### `src/types/health.ts`
+
+Contiene:
+
 - `HealthResponse`
 
-Esto aporta tres ventajas:
+Es un modelo pequeno para la comprobacion de salud del backend.
+
+Esta organizacion aporta tres ventajas:
 
 1. autocompletado,
 2. mayor seguridad al programar,
 3. mejor alineacion entre frontend y backend.
+
+Paso a paso, cada modelo fue agregado tomando como referencia:
+
+1. el schema del backend,
+2. la forma real de entrada o salida de la API,
+3. el dominio funcional al que pertenece.
 
 ## 8. Carpeta `src/components/`
 
@@ -270,6 +461,12 @@ Cuando el frontend arranca, ocurre este flujo:
 6. Si el token falla, se elimina del almacenamiento local para evitar sesiones rotas.
 
 Este flujo cubre la base minima de una app conectada a una API real.
+
+Ademas, si existe token:
+
+7. se consulta el carrito,
+8. se calcula la suma de cantidades,
+9. se muestra ese total en el encabezado.
 
 ## 10. Ajuste realizado en el backend
 
@@ -440,3 +637,50 @@ Lo mas importante de entender es esta separacion:
 - `App.tsx` como coordinador inicial.
 
 Si entiendes esa estructura, podras extender el proyecto con mucha mas seguridad y orden.
+
+## 19. Gestion de assets heredados
+
+El material del curso incluye CSS, JS, imagenes y sonidos heredados de un template.
+
+Despues de revisar ese material, se aplico una decision importante:
+
+- no cargar globalmente en `index.html` el CSS heredado por defecto,
+- usar primero los recursos ya confirmados dentro de `src/assets/images/` y `src/assets/sonidos/`,
+- dejar `src/assets/assets1/` como repositorio de apoyo para integrar partes concretas mas adelante.
+
+Esta decision se tomo porque el CSS heredado referencia imagenes que no estaban completas en las rutas esperadas y podia contaminar la interfaz React actual.
+
+Los recursos aprovechables quedaron inventariados en:
+
+- `src/assets/README.md`
+
+## 20. Estado del encabezado actual
+
+El encabezado fue redisenado para cumplir una funcion de layout global moderna.
+
+Estructura:
+
+1. parte superior izquierda con logo y nombre de la academia,
+2. segunda fila con navegacion funcional.
+
+Elementos visibles actuales:
+
+- categorias con selector,
+- buscador de cursos con icono de lupa,
+- acceso a `Mi aprendizaje`,
+- carrito con contador,
+- `Iniciar sesion`,
+- `Registrate`.
+
+Decisiones aplicadas:
+
+- el branding se mantiene arriba a la izquierda,
+- los controles inferiores comparten altura visual,
+- el carrito usa datos reales si hay token,
+- se evita cargar elementos heredados del curso que aun no estan conectados.
+
+## 21. Memoria operativa
+
+Para retomar rapidamente el proyecto en futuras sesiones, el estado actual tambien se resume en:
+
+- `PROJECT_MEMORY.md`

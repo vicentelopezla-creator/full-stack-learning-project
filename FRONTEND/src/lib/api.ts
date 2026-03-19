@@ -1,25 +1,58 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.trim() || 'http://127.0.0.1:8000';
 
+type PrimitiveValue = string | number | boolean;
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  query?: Record<string, PrimitiveValue | null | undefined>;
 };
+
+function buildUrl(path: string, query?: RequestOptions['query']) {
+  const url = new URL(`${API_BASE_URL}${path}`);
+
+  if (query) {
+    for (const [key, value] of Object.entries(query)) {
+      if (value === null || value === undefined) {
+        continue;
+      }
+
+      url.searchParams.set(key, String(value));
+    }
+  }
+
+  return url.toString();
+}
 
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const isFormData = options.body instanceof FormData;
+  let requestBody: FormData | string | undefined;
+
+  if (options.body instanceof FormData) {
+    requestBody = options.body;
+  } else if (options.body !== undefined) {
+    requestBody = JSON.stringify(options.body);
+  }
+
+  const headers: Record<string, string> = {
+    ...(options.token
+      ? { Authorization: `Bearer ${options.token}` }
+      : {}),
+  };
+
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  const response = await fetch(buildUrl(path, options.query), {
     method: options.method ?? 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.token
-        ? { Authorization: `Bearer ${options.token}` }
-        : {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
+    headers,
+    body: requestBody,
   });
 
   if (!response.ok) {

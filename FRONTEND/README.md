@@ -9,10 +9,41 @@ Este frontend fue preparado con una estructura moderna basada en **React + Vite 
 - `.env.example`: URL base de la API.
 - `src/lib/api.ts`: cliente base para hacer peticiones HTTP.
 - `src/lib/storage.ts`: manejo del token en `localStorage`.
-- `src/services/`: funciones separadas por dominio (`auth`, `catalog`).
-- `src/types/api.ts`: tipos TypeScript alineados con tus schemas de FastAPI.
+- `src/services/`: funciones separadas por dominio (`auth`, `catalog`, `video`, `carrito`, `venta`, `me`, `checkbox`, `commentary`, `response`).
+- `src/types/`: modelos TypeScript separados por dominio y alineados con tus schemas de FastAPI.
 - `src/components/`: componentes reutilizables de interfaz.
+- `src/assets/`: imagenes, logos, sonidos y otros recursos importables desde React.
+- `src/styles/`: hojas de estilo adicionales del proyecto.
+- `src/vendor/`: archivos heredados o de terceros que no forman parte del nucleo del codigo.
 - `src/App.tsx`: composicion principal de la aplicacion.
+
+## Estructura sugerida para recursos del curso
+
+Si el curso te entrega carpetas de recursos como `assets1`, `css`, `descargas`, `images`, `js`, `logo` y `sonidos`, la recomendacion es reubicarlas de esta forma:
+
+- `assets1` -> `src/vendor/assets1`
+- `css` -> `src/styles/course`
+- `descargas` -> `src/assets/images/downloads` o `public/downloads` segun el uso
+- `images` -> `src/assets/images/general`
+- `js` -> `src/vendor/js`
+- `logo` -> `src/assets/images/logos`
+- `sonidos` -> `src/assets/audio`
+
+Esto ayuda a separar recursos visuales, estilos, audio y archivos heredados del curso.
+
+## Limpieza aplicada
+
+El `index.html` del proyecto fue limpiado para no cargar por defecto el CSS y JS heredado del template del curso.
+
+Motivo:
+
+- esos archivos todavia referencian imagenes faltantes,
+- no forman parte del flujo actual de React,
+- y pueden introducir estilos globales o comportamiento inesperado.
+
+Los recursos disponibles y reutilizables quedaron documentados en:
+
+- `src/assets/README.md`
 
 ## Flujo actual
 
