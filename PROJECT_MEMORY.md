@@ -1,15 +1,19 @@
 # Project Memory
 
+## Fecha de actualizacion
+
+- 2026-03-20
+
 ## Estado general
 
-Proyecto full stack basado en curso de API RESTful.
+Proyecto full stack para academia online.
 
 - Backend: FastAPI + SQLAlchemy + PostgreSQL
 - Frontend: React + Vite + TypeScript
-- Repositorio Git inicializado y conectado a GitHub
-- Rama principal protegida en GitHub con PR y checks `backend` y `frontend`
+- El flujo de autenticacion y registro ya es funcional de punta a punta
+- La documentacion principal quedo actualizada para continuar manana
 
-## Rama de trabajo actual
+## Rama de trabajo
 
 - `feature/frontend-types-refactor`
 
@@ -17,82 +21,78 @@ Proyecto full stack basado en curso de API RESTful.
 
 ### Backend
 
-- Se agrego `CORS` configurable por entorno.
-- Se agrego validacion basica de uploads de video.
-- Se creo `BACKEND/.env.example`.
-- Se dejo documentacion de colaboracion y seguridad en la raiz del repo.
+- Se dejo `CORS` configurable por entorno.
+- Se incorporo configuracion de registro:
+  - `REGISTRATION_CODE_EXPIRE_MINUTES`
+  - `PRIVACY_CONSENT_VERSION`
+  - configuracion SMTP
+  - carpeta de debug `BACKEND/tmp/emails`
+- Se agrego la tabla `registration_requests`.
+- Se creo `app/services/email_service.py`.
+- Se actualizo `auth_service.py` para soportar:
+  - reto humano firmado,
+  - solicitud de codigo de registro,
+  - verificacion por codigo,
+  - login con compatibilidad para passwords antiguas.
+- Se agregaron rutas nuevas en `app/routes/auth.py`:
+  - `GET /auth/register/challenge`
+  - `POST /auth/register/request-code`
+  - `POST /auth/register/verify`
+- `POST /users/` ya no es registro publico; ahora queda protegido para admin.
+- Se corrigio un bug de fechas en la verificacion del codigo de registro.
 
 ### Frontend
 
-- Se creo la base React + Vite + TypeScript.
-- Se conecto con FastAPI usando `src/lib/api.ts`.
-- Se implemento login y recuperacion de sesion.
-- Se separaron todos los modelos TypeScript por dominio en `src/types/`.
-- Se crearon servicios por dominio en `src/services/`.
-- Se organizo la carpeta de assets.
-- Se revisaron los assets heredados del curso y se decidio no cargar globalmente el template CSS heredado.
-- Se rediseño el encabezado:
-  - branding arriba a la izquierda,
-  - segunda fila con categorias, busqueda, aprendizaje, carrito y acceso de sesion,
-  - contador real del carrito si existe token.
+- Se rediseño el encabezado para que responda correctamente en escritorio, tablet y movil.
+- El drawer lateral del movil ya funciona como capa global y no queda tapado por el body.
+- Se creo `src/components/AuthDialog.tsx`.
+- `Iniciar sesion` y `Registrate` del encabezado abren un dialogo responsive real.
+- El registro ahora funciona en dos pasos:
+  - solicitud de codigo,
+  - verificacion del email.
+- El formulario de registro:
+  - reinicia sus campos al cerrar,
+  - tiene mejor ancho,
+  - mantiene scroll interno si el contenido es alto.
+- Cuando el usuario inicia sesion:
+  - el encabezado muestra avatar con iniciales,
+  - solo se muestra primer nombre + primer apellido,
+  - el bloque del usuario despliega un menu con `Cerrar sesion`.
+- `src/lib/api.ts` ya devuelve un mensaje de error mas claro cuando el navegador no puede conectar con el backend.
 
-## Decisiones importantes
+## Archivos clave recientes
 
-1. La fuente de verdad para modelos del frontend son los `schemas` y rutas del backend, no directamente la base de datos.
-2. Los tipos del frontend se separan por dominio, no en un solo archivo global.
-3. Los componentes no deben hacer `fetch` directo cuando ya exista un servicio.
-4. Los assets heredados del curso solo se integraran de forma selectiva.
-5. El CSS heredado del template no debe cargarse globalmente mientras tenga rutas rotas o comportamiento no controlado.
+### Backend
 
-## Recursos ya identificados
+- `BACKEND/app/core/config.py`
+- `BACKEND/app/models/registration_request.py`
+- `BACKEND/app/routes/auth.py`
+- `BACKEND/app/routes/users.py`
+- `BACKEND/app/schemas/auth.py`
+- `BACKEND/app/services/auth_service.py`
+- `BACKEND/app/services/email_service.py`
+- `BACKEND/.env.example`
 
-### Assets utiles confirmados
+### Frontend
 
-- `FRONTEND/src/assets/images/`
-- `FRONTEND/src/assets/images/ecommerce/checkout/`
-- `FRONTEND/src/assets/sonidos/`
+- `FRONTEND/src/App.tsx`
+- `FRONTEND/src/components/AuthDialog.tsx`
+- `FRONTEND/src/components/UserPanel.tsx`
+- `FRONTEND/src/lib/api.ts`
+- `FRONTEND/src/services/auth.ts`
+- `FRONTEND/src/types/auth.ts`
+- `FRONTEND/src/styles.css`
+- `FRONTEND/.env.example`
 
-### Assets heredados
-
-- `FRONTEND/src/assets/assets1/`
-
-Este material existe como apoyo, pero no se carga automaticamente en `index.html`.
-
-## Servicios disponibles en frontend
-
-- `auth`
-- `catalog`
-- `video`
-- `carrito`
-- `venta`
-- `me`
-- `checkbox`
-- `commentary`
-- `response`
-
-## Modelos disponibles en frontend
-
-- `auth`
-- `user`
-- `category`
-- `course`
-- `video`
-- `carrito`
-- `venta`
-- `checkbox`
-- `commentary`
-- `response`
-- `me`
-- `health`
-
-## Comandos utiles
+## Comandos utiles para retomar manana
 
 ### Backend
 
 ```powershell
 cd C:\App\VLANDA\projects_python\full-stack\BACKEND
+copy .env.example .env
 .\venv\Scripts\activate
-python run_tests.py
+python -m app.init_db
 uvicorn app.main:app --reload
 ```
 
@@ -100,17 +100,41 @@ uvicorn app.main:app --reload
 
 ```powershell
 cd C:\App\VLANDA\projects_python\full-stack\FRONTEND
+copy .env.example .env
+npm install
 npm run dev
-npm run build
 ```
 
-## Proximo paso natural
+### Verificaciones rapidas
 
-Conectar visualmente el encabezado con navegacion real:
+- `http://127.0.0.1:8000/health`
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:5173`
 
-- `Mi aprendizaje`
-- `Carrito`
-- `Iniciar sesion`
-- `Registrate`
+## Notas operativas importantes
 
-y despues avanzar hacia React Router y vistas separadas.
+- Si no configuras SMTP, el codigo de verificacion no llega a una bandeja real.
+- En ese caso debes revisar el ultimo archivo generado en `BACKEND/tmp/emails`.
+- Despues de agregar tablas nuevas conviene ejecutar `python -m app.init_db`.
+- El backend y el frontend deben seguir usando `http://127.0.0.1:8000` y `http://127.0.0.1:5173` para que CORS siga alineado.
+
+## Punto exacto donde quedamos
+
+La autenticacion ya esta integrada en el encabezado:
+
+- login funcional,
+- registro con codigo,
+- verificacion del email,
+- menu de cuenta con cierre de sesion.
+
+El sistema quedo en un punto estable para pasar al siguiente bloque funcional.
+
+## Siguiente paso natural
+
+1. Convertir `Mi aprendizaje` y `Carrito` en navegacion real.
+2. Crear una vista de perfil o cuenta para el usuario autenticado.
+3. Añadir mas opciones al menu del perfil:
+   - `Mi perfil`
+   - `Mis cursos`
+   - `Configuracion`
+4. Preparar React Router para separar vistas.

@@ -16,7 +16,7 @@ def register_user(db: Session, data: UserCreate) -> User:
         name=data.name,
         surname=data.surname,
         role="student",
-        email=data.email,
+        email=data.email.strip().lower(),
         password=hash_password(data.password),
         description=data.description,
         image=data.image,

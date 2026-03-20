@@ -11,6 +11,13 @@ def parse_csv_env(value: str | None, *, default: list[str]) -> list[str]:
     return [item for item in items if item]
 
 
+def parse_bool_env(value: str | None, *, default: bool) -> bool:
+    if value is None:
+        return default
+
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def load_env_file() -> None:
     """Load simple KEY=VALUE pairs from BACKEND/.env if the file exists."""
     env_path = Path(__file__).resolve().parents[2] / ".env"
@@ -33,11 +40,22 @@ class Settings:
     database_url: str
     secret_key: str
     access_token_expire_minutes: int
+    registration_code_expire_minutes: int
+    privacy_consent_version: str
     videos_upload_dir: str
     cors_allowed_origins: list[str]
     max_upload_size_bytes: int
     allowed_upload_extensions: list[str]
     allowed_upload_content_types: list[str]
+    smtp_host: str | None
+    smtp_port: int
+    smtp_username: str | None
+    smtp_password: str | None
+    smtp_from_email: str | None
+    smtp_from_name: str
+    smtp_starttls: bool
+    smtp_use_ssl: bool
+    smtp_debug_dir: str
 
 
 def get_settings() -> Settings:
@@ -56,6 +74,8 @@ def get_settings() -> Settings:
         )
 
     expire_minutes = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
+    registration_code_expire_minutes = int(os.getenv("REGISTRATION_CODE_EXPIRE_MINUTES", "10"))
+    privacy_consent_version = os.getenv("PRIVACY_CONSENT_VERSION", "2026-03")
     videos_upload_dir = os.getenv(
         "VIDEOS_UPLOAD_DIR",
         str(Path(__file__).resolve().parents[2] / "uploads" / "videos"),
@@ -81,16 +101,39 @@ def get_settings() -> Settings:
             "video/webm",
         ],
     )
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+    smtp_username = os.getenv("SMTP_USERNAME")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+    smtp_from_email = os.getenv("SMTP_FROM_EMAIL")
+    smtp_from_name = os.getenv("SMTP_FROM_NAME", "Vicenweb Academy")
+    smtp_starttls = parse_bool_env(os.getenv("SMTP_STARTTLS"), default=True)
+    smtp_use_ssl = parse_bool_env(os.getenv("SMTP_USE_SSL"), default=False)
+    smtp_debug_dir = os.getenv(
+        "SMTP_DEBUG_DIR",
+        str(Path(__file__).resolve().parents[2] / "tmp" / "emails"),
+    )
 
     return Settings(
         database_url=database_url,
         secret_key=secret_key,
         access_token_expire_minutes=expire_minutes,
+        registration_code_expire_minutes=registration_code_expire_minutes,
+        privacy_consent_version=privacy_consent_version,
         videos_upload_dir=videos_upload_dir,
         cors_allowed_origins=cors_allowed_origins,
         max_upload_size_bytes=max_upload_size_bytes,
         allowed_upload_extensions=allowed_upload_extensions,
         allowed_upload_content_types=allowed_upload_content_types,
+        smtp_host=smtp_host,
+        smtp_port=smtp_port,
+        smtp_username=smtp_username,
+        smtp_password=smtp_password,
+        smtp_from_email=smtp_from_email,
+        smtp_from_name=smtp_from_name,
+        smtp_starttls=smtp_starttls,
+        smtp_use_ssl=smtp_use_ssl,
+        smtp_debug_dir=smtp_debug_dir,
     )
 
 
