@@ -24,5 +24,9 @@ def get_users(
 
 
 @router.post("/", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
-def create_user(data: UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    data: UserCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+):
     return register_user_service(db, data)

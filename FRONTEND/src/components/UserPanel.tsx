@@ -14,9 +14,11 @@ export function UserPanel({ user, token, onLogout }: UserPanelProps) {
           <p className="eyebrow">Sesion</p>
           <h2>Estado del usuario autenticado</h2>
         </div>
-        <button className="button button--ghost" type="button" onClick={onLogout}>
-          Cerrar sesion
-        </button>
+        {user ? (
+          <button className="button button--ghost" type="button" onClick={onLogout}>
+            Cerrar sesion
+          </button>
+        ) : null}
       </div>
 
       {user ? (

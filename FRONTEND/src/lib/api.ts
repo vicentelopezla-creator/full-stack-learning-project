@@ -49,11 +49,19 @@ export async function apiRequest<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  const response = await fetch(buildUrl(path, options.query), {
-    method: options.method ?? 'GET',
-    headers,
-    body: requestBody,
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(buildUrl(path, options.query), {
+      method: options.method ?? 'GET',
+      headers,
+      body: requestBody,
+    });
+  } catch {
+    throw new Error(
+      `No pudimos conectar con el backend en ${API_BASE_URL}. Verifica que FastAPI siga activo e intenta otra vez.`,
+    );
+  }
 
   if (!response.ok) {
     const fallbackMessage = `Error HTTP ${response.status}`;

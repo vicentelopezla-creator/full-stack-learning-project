@@ -5,5 +5,6 @@ from app.models.video import Video
 from app.models.carrito import Carrito
 from app.models.checkbox import Checkbox
 from app.models.commentary import Commentary
+from app.models.registration_request import RegistrationRequest
 from app.models.response import Response
 from app.models.venta import Venta

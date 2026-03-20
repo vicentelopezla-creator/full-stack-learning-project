@@ -16,7 +16,18 @@ El objetivo no fue crear una plantilla vacia, sino dejar una primera version uti
 - carga categorias,
 - carga cursos,
 - permite iniciar sesion,
-- recupera la sesion desde un token guardado.
+- recupera la sesion desde un token guardado,
+- permite registrarse con verificacion por email.
+
+## 1.1 Actualizacion funcional reciente
+
+En la iteracion mas reciente se incorporaron estos cambios importantes:
+
+- dialogo de autenticacion responsive para `Iniciar sesion` y `Registrate`,
+- registro en dos pasos con consentimiento de datos, reto humano y codigo de verificacion,
+- menu de cuenta en el encabezado para cerrar sesion,
+- encabezado responsive con drawer lateral para movil,
+- mensajes de error de red mas claros cuando el frontend no logra conectar con FastAPI.
 
 ## 2. Por que se eligio React + Vite + TypeScript
 
@@ -138,6 +149,9 @@ En el estado actual, `App.tsx` tambien cumple estas funciones:
 - administra la categoria seleccionada,
 - ejecuta la busqueda de cursos en memoria,
 - calcula el contador del carrito cuando hay sesion,
+- abre el dialogo de autenticacion,
+- coordina el registro por codigo,
+- muestra el bloque de usuario autenticado con menu desplegable,
 - compone el footer global.
 
 ### `src/styles.css`
@@ -159,6 +173,9 @@ Despues se fue ampliando para cubrir:
 
 - encabezado global,
 - barra de acciones principal,
+- dialogo de autenticacion,
+- drawer lateral para movil,
+- menu desplegable de cuenta,
 - footer,
 - refinamiento responsive.
 
@@ -194,6 +211,9 @@ Contiene funciones relacionadas con autenticacion:
 
 - `login()`
 - `getCurrentUser()`
+- `getRegistrationChallenge()`
+- `requestRegistrationCode()`
+- `verifyRegistrationCode()`
 
 De esta manera, los componentes no hacen llamadas HTTP directas con detalles de rutas y headers. Solo invocan funciones de negocio frontend.
 
@@ -294,8 +314,13 @@ Contiene:
 
 - `LoginRequest`
 - `LoginResponse`
+- `AuthDialogMode`
+- `RegistrationChallenge`
+- `RegistrationRequestPayload`
+- `RegistrationRequestResponse`
+- `RegistrationVerifyPayload`
 
-Separa claramente lo que el frontend envia al autenticar y lo que recibe de vuelta.
+Separa claramente lo que el frontend envia o recibe tanto en login como en el registro verificado.
 
 ### `src/types/category.ts`
 
@@ -420,6 +445,21 @@ Recibe:
 
 Su responsabilidad es solo la interfaz del login.
 
+### `AuthDialog.tsx`
+
+Es el contenedor principal del flujo moderno de autenticacion.
+
+Incluye:
+
+- pestañas para login y registro,
+- formulario de login,
+- formulario de registro,
+- bloque de consentimiento de datos,
+- verificacion humana,
+- ingreso del codigo enviado por email.
+
+Su objetivo es centralizar el acceso desde el encabezado y mantener una experiencia coherente entre escritorio y movil.
+
 ### `UserPanel.tsx`
 
 Muestra el usuario autenticado y el token parcial cuando la sesion esta activa. Tambien incorpora el boton de cerrar sesion.
@@ -467,6 +507,16 @@ Ademas, si existe token:
 7. se consulta el carrito,
 8. se calcula la suma de cantidades,
 9. se muestra ese total en el encabezado.
+
+Y para el registro nuevo:
+
+10. `Registrate` solicita primero un reto humano al backend,
+11. el usuario completa nombre, apellido, email, password y consentimiento,
+12. el frontend solicita el codigo de verificacion,
+13. el backend guarda una solicitud pendiente y genera el codigo,
+14. el usuario introduce el codigo recibido,
+15. el backend verifica el codigo y devuelve token + usuario,
+16. el encabezado pasa a mostrar las iniciales y el nombre resumido del usuario.
 
 ## 10. Ajuste realizado en el backend
 
@@ -574,13 +624,15 @@ Tambien se detecto una observacion importante:
 
 ## 15. Estado actual del proyecto
 
-En la ultima verificacion:
+En la ultima actualizacion funcional:
 
-- el frontend estaba corriendo en el puerto `5173`,
-- el backend no estaba escuchando en `http://127.0.0.1:8000`,
-- aun asi el backend se valido correctamente con su suite de pruebas.
+- el frontend compila correctamente con `npm run build`,
+- el dialogo de registro ya no se sale del viewport,
+- el flujo de registro y verificacion quedo conectado con el backend,
+- el encabezado muestra el usuario autenticado con menu de cuenta,
+- el backend necesita estar levantado en `http://127.0.0.1:8000` para login y registro reales.
 
-Esto significa que el frontend esta vivo, pero para conectar ambos lados necesitas volver a levantar FastAPI si vas a trabajar de forma interactiva.
+Si el backend no tiene SMTP configurado, el codigo de verificacion se toma desde `BACKEND/tmp/emails`.
 
 ## 16. Pasos para retomar el proyecto
 
@@ -670,13 +722,16 @@ Elementos visibles actuales:
 - acceso a `Mi aprendizaje`,
 - carrito con contador,
 - `Iniciar sesion`,
-- `Registrate`.
+- `Registrate`,
+- bloque de usuario autenticado con avatar e iniciales cuando la sesion esta activa.
 
 Decisiones aplicadas:
 
 - el branding se mantiene arriba a la izquierda,
 - los controles inferiores comparten altura visual,
 - el carrito usa datos reales si hay token,
+- en movil el menu se mueve a un drawer lateral,
+- el bloque del usuario abre una lista con opcion de cerrar sesion,
 - se evita cargar elementos heredados del curso que aun no estan conectados.
 
 ## 21. Memoria operativa

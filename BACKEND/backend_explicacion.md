@@ -4,6 +4,8 @@
 
 Este backend esta construido con FastAPI y SQLAlchemy. Su funcion principal es exponer una API para autenticar usuarios, administrar cursos y categorias, servir videos, gestionar carrito y compras, registrar progreso de aprendizaje y habilitar una pequena capa de comunidad con comentarios y respuestas.
 
+En la ultima iteracion tambien se agrego un flujo de registro verificado por email, de forma que la cuenta ya no se crea directamente desde una ruta publica simple.
+
 La arquitectura esta organizada por responsabilidades:
 
 - `app/main.py` arranca la API y registra las rutas.
@@ -93,6 +95,13 @@ Paso a paso:
 
 Es el centro de configuracion del backend.
 
+Ademas de la base existente, ahora tambien controla:
+
+- expiracion del codigo de registro,
+- version del consentimiento de datos,
+- configuracion SMTP,
+- carpeta de depuracion para previews de email.
+
 ### `database.py`
 
 Define la conexion a la base de datos:
@@ -172,6 +181,22 @@ Relaciones:
 - respuestas,
 - checkboxes de progreso.
 
+### `registration_request.py`
+
+Representa una solicitud de registro pendiente.
+
+Guarda:
+
+- nombre y apellido,
+- email normalizado,
+- password ya hasheada,
+- hash del codigo de verificacion,
+- fecha de expiracion del codigo,
+- version y fecha del consentimiento aceptado,
+- estado del proceso.
+
+Esta tabla permite validar el email antes de crear definitivamente al usuario en `users`.
+
 ### `category.py`
 
 Agrupa cursos por categoria. Se relaciona con `Course`.
@@ -243,6 +268,10 @@ Aqui estan los contratos de la API con Pydantic. Estos esquemas validan la entra
 ### `auth.py`
 
 - `LoginRequest`: email y password para iniciar sesion.
+- `RegistrationChallengeResponse`: reto humano firmado.
+- `RegistrationRequestStart`: datos necesarios para pedir el codigo de registro.
+- `RegistrationRequestStartResponse`: confirmacion de solicitud del codigo.
+- `RegistrationVerifyRequest`: email y codigo para finalizar el alta.
 - `TokenResponse`: devuelve `access_token`, `token_type` y el usuario autenticado.
 
 ### `user.py`
@@ -318,13 +347,26 @@ Es la capa mas importante de logica de negocio. Las rutas idealmente delegan aqu
 
 ### `auth_service.py`
 
-Gestiona el login:
+Gestiona el login y el registro verificado.
+
+Para login:
 
 1. busca un usuario por email,
 2. valida la contrasena,
 3. si detecta una contrasena antigua en texto plano, la reemplaza por una hasheada,
 4. crea un token de acceso,
 5. devuelve token y usuario.
+
+Para registro:
+
+1. genera un reto humano firmado,
+2. valida el consentimiento,
+3. valida la respuesta del reto humano,
+4. crea o actualiza una solicitud pendiente,
+5. genera un codigo temporal,
+6. envia el codigo por email o lo guarda como preview en `BACKEND/tmp/emails`,
+7. verifica el codigo cuando el usuario lo introduce,
+8. solo entonces crea la cuenta definitiva en `users`.
 
 ### `user_service.py`
 
@@ -333,7 +375,8 @@ Se encarga de usuarios:
 - listar usuarios,
 - registrar nuevos usuarios,
 - hashear password antes de guardar,
-- controlar conflicto por email duplicado.
+- controlar conflicto por email duplicado,
+- normalizar el email antes de persistirlo.
 
 ### `catalog_service.py`
 
@@ -388,6 +431,17 @@ Guarda archivos de video en disco:
 - escribe el contenido binario en disco,
 - devuelve la ruta almacenada.
 
+### `email_service.py`
+
+Centraliza el envio de correo para el registro.
+
+Comportamiento:
+
+- si hay SMTP configurado, envia el email real,
+- si no hay SMTP, crea un archivo de preview en `BACKEND/tmp/emails`.
+
+Esto permite desarrollar y probar el registro sin depender desde el primer dia de una cuenta de correo real.
+
 ## 9. Carpeta `app/routes/`
 
 Aqui vive la capa HTTP. Cada archivo define endpoints y delega en servicios.
@@ -397,16 +451,21 @@ Aqui vive la capa HTTP. Cada archivo define endpoints y delega en servicios.
 Endpoints:
 
 - `POST /auth/login`
+- `GET /auth/register/challenge`
+- `POST /auth/register/request-code`
+- `POST /auth/register/verify`
 - `GET /auth/me`
 
-Permite autenticarse y consultar el usuario actual a partir del token.
+Permite autenticarse, solicitar el codigo de registro, verificar el email y consultar el usuario actual a partir del token.
 
 ### `users.py`
 
 Endpoints:
 
 - `GET /users/` solo para admin,
-- `POST /users/` para registrar usuarios.
+- `POST /users/` solo para admin.
+
+La creacion publica de usuarios ya no vive aqui. El alta publica ahora pasa por el flujo `auth/register/*` para exigir verificacion por email.
 
 ### `products.py`
 
@@ -499,11 +558,14 @@ Esto indica que el proyecto esta intentando validar tanto reglas tecnicas como r
 
 ### Registro de usuario
 
-1. El cliente envia datos a `POST /users/`.
-2. `routes/users.py` valida el cuerpo con `UserCreate`.
-3. `user_service.register_user()` hashea la contrasena.
-4. Se crea la fila en la tabla `users`.
-5. Se devuelve `UserPublic`.
+1. El cliente solicita un reto con `GET /auth/register/challenge`.
+2. El cliente envia nombre, apellido, email, password, consentimiento y respuesta humana a `POST /auth/register/request-code`.
+3. `auth_service.start_registration()` valida todo y crea una fila en `registration_requests`.
+4. Se genera un codigo temporal y se envia por email o se guarda en `BACKEND/tmp/emails`.
+5. El cliente envia email + codigo a `POST /auth/register/verify`.
+6. `auth_service.verify_registration_code()` valida el codigo pendiente.
+7. Solo entonces se crea la fila definitiva en `users`.
+8. El backend devuelve token y usuario autenticado.
 
 ### Inicio de sesion
 
