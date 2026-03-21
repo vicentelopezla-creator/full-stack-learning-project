@@ -2,9 +2,11 @@ BACKEND/.env
 BACKEND/uploads/
 BACKEND/tmp/
 BACKEND/venv/
+BACKEND/.ruff_cache/
 __pycache__/
 *.pyc
 FRONTEND/node_modules/
 FRONTEND/dist/
 FRONTEND/.env
+FRONTEND/.eslintcache
 ~$*.docx
