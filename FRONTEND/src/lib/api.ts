@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || 'http://127.0.0.1:8000';
 
 type PrimitiveValue = string | number | boolean;
 
@@ -26,10 +25,7 @@ function buildUrl(path: string, query?: RequestOptions['query']) {
   return url.toString();
 }
 
-export async function apiRequest<T>(
-  path: string,
-  options: RequestOptions = {},
-): Promise<T> {
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const isFormData = options.body instanceof FormData;
   let requestBody: FormData | string | undefined;
 
@@ -40,9 +36,7 @@ export async function apiRequest<T>(
   }
 
   const headers: Record<string, string> = {
-    ...(options.token
-      ? { Authorization: `Bearer ${options.token}` }
-      : {}),
+    ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
   };
 
   if (!isFormData) {

@@ -44,7 +44,9 @@ export default function App() {
   const [registering, setRegistering] = useState(false);
   const [registrationError, setRegistrationError] = useState<string | null>(null);
   const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
-  const [registrationChallenge, setRegistrationChallenge] = useState<RegistrationChallenge | null>(null);
+  const [registrationChallenge, setRegistrationChallenge] = useState<RegistrationChallenge | null>(
+    null,
+  );
   const [pendingRegistrationEmail, setPendingRegistrationEmail] = useState('');
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -219,7 +221,9 @@ export default function App() {
       const challenge = await getRegistrationChallenge();
       setRegistrationChallenge(challenge);
     } catch (error) {
-      setRegistrationError(error instanceof Error ? error.message : 'No se pudo preparar el registro');
+      setRegistrationError(
+        error instanceof Error ? error.message : 'No se pudo preparar el registro',
+      );
     }
   }
 
@@ -288,7 +292,9 @@ export default function App() {
       setRegistrationMessage(response.detail);
       void loadRegistrationChallenge();
     } catch (error) {
-      setRegistrationError(error instanceof Error ? error.message : 'No se pudo solicitar el codigo');
+      setRegistrationError(
+        error instanceof Error ? error.message : 'No se pudo solicitar el codigo',
+      );
       void loadRegistrationChallenge();
       throw error;
     } finally {
@@ -303,7 +309,9 @@ export default function App() {
       const response = await verifyRegistrationCode({ email, code });
       handleAuthSuccess(response);
     } catch (error) {
-      setRegistrationError(error instanceof Error ? error.message : 'No se pudo verificar el codigo');
+      setRegistrationError(
+        error instanceof Error ? error.message : 'No se pudo verificar el codigo',
+      );
       throw error;
     } finally {
       setRegistering(false);
@@ -434,15 +442,23 @@ export default function App() {
                     aria-expanded={isProfileMenuOpen}
                     onClick={() => setIsProfileMenuOpen((current) => !current)}
                   >
-                    <span className="topbar__profile-avatar" aria-hidden="true">{userInitials}</span>
+                    <span className="topbar__profile-avatar" aria-hidden="true">
+                      {userInitials}
+                    </span>
                     <span className="topbar__profile-copy">
                       <span className="topbar__profile-label">Sesion activa</span>
                       <strong>{displayName}</strong>
                     </span>
-                    <span className="topbar__profile-caret" aria-hidden="true">▾</span>
+                    <span className="topbar__profile-caret" aria-hidden="true">
+                      ▾
+                    </span>
                   </button>
 
-                  <ul className="topbar__profile-dropdown" role="menu" aria-label="Opciones de la cuenta">
+                  <ul
+                    className="topbar__profile-dropdown"
+                    role="menu"
+                    aria-label="Opciones de la cuenta"
+                  >
                     <li role="none">
                       <button
                         type="button"
@@ -547,8 +563,13 @@ export default function App() {
           <div className="topbar__mobile-list-group">
             <span className="topbar__mobile-list-title">Opciones</span>
             {user ? (
-              <div className="topbar__mobile-profile" aria-label={`Sesion iniciada como ${displayName}`}>
-                <span className="topbar__mobile-profile-avatar" aria-hidden="true">{userInitials}</span>
+              <div
+                className="topbar__mobile-profile"
+                aria-label={`Sesion iniciada como ${displayName}`}
+              >
+                <span className="topbar__mobile-profile-avatar" aria-hidden="true">
+                  {userInitials}
+                </span>
                 <div className="topbar__mobile-profile-copy">
                   <span className="topbar__mobile-profile-label">Sesion activa</span>
                   <strong>{displayName}</strong>
@@ -597,23 +618,24 @@ export default function App() {
         onClick={() => setIsMenuOpen(false)}
       />
 
-      <AuthDialog
-        open={isAuthDialogOpen}
-        mode={authDialogMode}
-        loginSubmitting={loggingIn}
-        loginError={loginError}
-        registrationSubmitting={registering}
-        registrationError={registrationError}
-        registrationMessage={registrationMessage}
-        registrationChallenge={registrationChallenge}
-        pendingRegistrationEmail={pendingRegistrationEmail}
-        consentVersion="2026-03"
-        onClose={closeAuthDialog}
-        onModeChange={handleAuthDialogModeChange}
-        onLogin={handleLogin}
-        onRequestRegistration={handleRegistrationRequest}
-        onVerifyRegistration={handleRegistrationVerification}
-      />
+      {isAuthDialogOpen ? (
+        <AuthDialog
+          mode={authDialogMode}
+          loginSubmitting={loggingIn}
+          loginError={loginError}
+          registrationSubmitting={registering}
+          registrationError={registrationError}
+          registrationMessage={registrationMessage}
+          registrationChallenge={registrationChallenge}
+          pendingRegistrationEmail={pendingRegistrationEmail}
+          consentVersion="2026-03"
+          onClose={closeAuthDialog}
+          onModeChange={handleAuthDialogModeChange}
+          onLogin={handleLogin}
+          onRequestRegistration={handleRegistrationRequest}
+          onVerifyRegistration={handleRegistrationVerification}
+        />
+      ) : null}
 
       <div className="app-shell">
         <header className="hero">
@@ -621,17 +643,13 @@ export default function App() {
             <p className="eyebrow">Frontend base</p>
             <h1>Academia Full Stack conectada a FastAPI</h1>
             <p className="hero__text">
-              Esta base te deja listo para crecer hacia un panel real de cursos,
-              autenticacion, carrito y consumo ordenado de tu API REST.
+              Esta base te deja listo para crecer hacia un panel real de cursos, autenticacion,
+              carrito y consumo ordenado de tu API REST.
             </p>
           </div>
 
           <div className="hero__stats">
-            <StatCard
-              label="API"
-              value={healthStatus}
-              hint="Respuesta del endpoint /health"
-            />
+            <StatCard label="API" value={healthStatus} hint="Respuesta del endpoint /health" />
             <StatCard
               label="Categorias"
               value={loadingCatalog ? '...' : String(categories.length)}
@@ -642,11 +660,7 @@ export default function App() {
               value={loadingCatalog ? '...' : String(courses.length)}
               hint="Datos leidos desde /products/"
             />
-            <StatCard
-              label="Base URL"
-              value="API"
-              hint={API_BASE_URL}
-            />
+            <StatCard label="Base URL" value="API" hint={API_BASE_URL} />
           </div>
         </header>
 
@@ -660,11 +674,7 @@ export default function App() {
 
           <aside className="content-grid__sidebar">
             {!user ? (
-              <LoginForm
-                isSubmitting={loggingIn}
-                error={loginError}
-                onSubmit={handleLogin}
-              />
+              <LoginForm isSubmitting={loggingIn} error={loginError} onSubmit={handleLogin} />
             ) : null}
             <UserPanel user={user} token={token} onLogout={handleLogout} />
           </aside>

@@ -1,5 +1,5 @@
 :root {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #102038;
   background:
     radial-gradient(circle at top left, rgba(255, 214, 102, 0.45), transparent 28%),
@@ -21,7 +21,7 @@
   --accent: #ffb703;
   --danger: #c0392b;
   --muted: #62748a;
-  --display-font: "Trebuchet MS", "Segoe UI", sans-serif;
+  --display-font: 'Trebuchet MS', 'Segoe UI', sans-serif;
   --topbar-height: 106px;
 }
 
@@ -44,7 +44,7 @@ a {
 }
 
 code {
-  font-family: Consolas, "Courier New", monospace;
+  font-family: Consolas, 'Courier New', monospace;
 }
 
 #root {
@@ -235,7 +235,7 @@ code {
 }
 
 .topbar__label--featured::before {
-  content: "◉";
+  content: '◉';
   margin-right: 8px;
   color: #ffcf5d;
 }
@@ -332,13 +332,13 @@ code {
 }
 
 .topbar__link--learning::before {
-  content: "▣";
+  content: '▣';
   margin-right: 8px;
   color: #8de7f1;
 }
 
 .topbar__link--session::before {
-  content: "◌";
+  content: '◌';
   margin-right: 8px;
   color: #9dd3ff;
 }
@@ -369,7 +369,9 @@ code {
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: inherit;
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease;
 }
 
 .topbar__profile:hover {
@@ -430,7 +432,10 @@ code {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-6px);
-  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 180ms ease;
   pointer-events: none;
   z-index: 20;
 }
@@ -586,8 +591,7 @@ code {
     gap: 12px;
     padding: 22px 24px 18px;
     border-bottom: 1px solid rgba(148, 163, 184, 0.24);
-    background:
-      linear-gradient(180deg, #ffffff 0%, rgba(248, 250, 252, 0.96) 100%);
+    background: linear-gradient(180deg, #ffffff 0%, rgba(248, 250, 252, 0.96) 100%);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -707,7 +711,7 @@ code {
   }
 
   .topbar__group::before {
-    content: "Explorar";
+    content: 'Explorar';
   }
 
   .topbar__mobile-list-title {
@@ -821,7 +825,7 @@ code {
   }
 
   .topbar__mobile-item::after {
-    content: "›";
+    content: '›';
     color: #6b7280;
     font-size: 1.1rem;
     line-height: 1;
@@ -1051,7 +1055,10 @@ code {
   border-radius: 14px;
   padding: 14px 16px;
   cursor: pointer;
-  transition: transform 160ms ease, opacity 160ms ease, background-color 160ms ease;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    background-color 160ms ease;
 }
 
 .button:hover {

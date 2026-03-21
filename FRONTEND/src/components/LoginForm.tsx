@@ -21,8 +21,8 @@ export function LoginForm({ isSubmitting, error, onSubmit }: LoginFormProps) {
         <p className="eyebrow">Acceso</p>
         <h2>Conecta el frontend con tu API</h2>
         <p>
-          Este formulario consume <code>/auth/login</code> y guarda el token para
-          futuras llamadas autenticadas.
+          Este formulario consume <code>/auth/login</code> y guarda el token para futuras llamadas
+          autenticadas.
         </p>
       </div>
 

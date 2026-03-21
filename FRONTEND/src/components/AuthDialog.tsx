@@ -2,7 +2,6 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import type { AuthDialogMode, RegistrationChallenge } from '../types/auth';
 
 type AuthDialogProps = {
-  open: boolean;
   mode: AuthDialogMode;
   loginSubmitting: boolean;
   loginError: string | null;
@@ -50,7 +49,6 @@ const consentSections = [
 ];
 
 export function AuthDialog({
-  open,
   mode,
   loginSubmitting,
   loginError,
@@ -99,10 +97,6 @@ export function AuthDialog({
   }
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
-
     const timeoutId = window.setTimeout(() => {
       if (mode === 'login') {
         loginInputRef.current?.focus();
@@ -114,26 +108,7 @@ export function AuthDialog({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [mode, open]);
-
-  useEffect(() => {
-    setLocalRegisterError(null);
-  }, [mode, open, pendingRegistrationEmail]);
-
-  useEffect(() => {
-    if (open) {
-      return;
-    }
-
-    resetLoginForm();
-    resetRegistrationForm();
-  }, [open]);
-
-  useEffect(() => {
-    if (!pendingRegistrationEmail) {
-      setVerificationCode('');
-    }
-  }, [pendingRegistrationEmail]);
+  }, [mode]);
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -155,7 +130,9 @@ export function AuthDialog({
     }
 
     if (!registrationChallenge) {
-      setLocalRegisterError('La verificacion humana aun no esta lista. Intenta de nuevo en unos segundos.');
+      setLocalRegisterError(
+        'La verificacion humana aun no esta lista. Intenta de nuevo en unos segundos.',
+      );
       return;
     }
 
@@ -167,6 +144,9 @@ export function AuthDialog({
       consentAccepted,
       humanAnswer,
     });
+
+    setLocalRegisterError(null);
+    setVerificationCode('');
   }
 
   async function handleVerificationSubmit(event: FormEvent<HTMLFormElement>) {
@@ -181,17 +161,31 @@ export function AuthDialog({
     await onVerifyRegistration(pendingRegistrationEmail || registerEmail, verificationCode);
   }
 
-  if (!open) {
-    return null;
-  }
-
   const activeRegisterError = localRegisterError || registrationError;
 
+  function handleModeSwitch(nextMode: AuthDialogMode) {
+    if (nextMode === mode) {
+      return;
+    }
+
+    setLocalRegisterError(null);
+    resetLoginForm();
+    resetRegistrationForm();
+    onModeChange(nextMode);
+  }
+
   return (
-    <div className="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-dialog-title">
+    <div
+      className="auth-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="auth-dialog-title"
+    >
       <div className="auth-dialog__backdrop" onClick={onClose} aria-hidden="true" />
 
-      <div className={`auth-dialog__surface${mode === 'register' ? ' auth-dialog__surface--wide' : ''}`}>
+      <div
+        className={`auth-dialog__surface${mode === 'register' ? ' auth-dialog__surface--wide' : ''}`}
+      >
         <button
           type="button"
           className="auth-dialog__close"
@@ -205,14 +199,14 @@ export function AuthDialog({
           <button
             type="button"
             className={`auth-dialog__switch-button${mode === 'login' ? ' auth-dialog__switch-button--active' : ''}`}
-            onClick={() => onModeChange('login')}
+            onClick={() => handleModeSwitch('login')}
           >
             Iniciar sesion
           </button>
           <button
             type="button"
             className={`auth-dialog__switch-button${mode === 'register' ? ' auth-dialog__switch-button--active' : ''}`}
-            onClick={() => onModeChange('register')}
+            onClick={() => handleModeSwitch('register')}
           >
             Registrate
           </button>
@@ -224,8 +218,8 @@ export function AuthDialog({
               <p className="eyebrow">Acceso</p>
               <h2 id="auth-dialog-title">Inicia sesion en tu cuenta</h2>
               <p>
-                Usa tu email y password para entrar. Cuando la sesion sea valida,
-                el encabezado mostrara tu identidad activa.
+                Usa tu email y password para entrar. Cuando la sesion sea valida, el encabezado
+                mostrara tu identidad activa.
               </p>
             </div>
 
@@ -258,7 +252,9 @@ export function AuthDialog({
               </button>
             </form>
 
-            {loginError ? <p className="feedback feedback--error auth-dialog__feedback">{loginError}</p> : null}
+            {loginError ? (
+              <p className="feedback feedback--error auth-dialog__feedback">{loginError}</p>
+            ) : null}
           </>
         ) : (
           <>
@@ -266,8 +262,8 @@ export function AuthDialog({
               <p className="eyebrow">Registro</p>
               <h2 id="auth-dialog-title">Crea tu cuenta verificada</h2>
               <p>
-                Primero validamos tus datos y te enviamos un codigo al email registrado.
-                Solo despues de verificar ese codigo se crea la cuenta.
+                Primero validamos tus datos y te enviamos un codigo al email registrado. Solo
+                despues de verificar ese codigo se crea la cuenta.
               </p>
             </div>
 
@@ -275,25 +271,25 @@ export function AuthDialog({
               <div className="auth-dialog__two-columns">
                 <label className="field">
                   <span>Nombre</span>
-                <input
-                  ref={registerInputRef}
-                  type="text"
-                  autoComplete="given-name"
-                  value={registerName}
-                  onChange={(event) => setRegisterName(event.target.value)}
-                  placeholder="Tu nombre"
+                  <input
+                    ref={registerInputRef}
+                    type="text"
+                    autoComplete="given-name"
+                    value={registerName}
+                    onChange={(event) => setRegisterName(event.target.value)}
+                    placeholder="Tu nombre"
                     required
                   />
                 </label>
 
                 <label className="field">
                   <span>Apellido</span>
-                <input
-                  type="text"
-                  autoComplete="family-name"
-                  value={registerSurname}
-                  onChange={(event) => setRegisterSurname(event.target.value)}
-                  placeholder="Tu apellido"
+                  <input
+                    type="text"
+                    autoComplete="family-name"
+                    value={registerSurname}
+                    onChange={(event) => setRegisterSurname(event.target.value)}
+                    placeholder="Tu apellido"
                   />
                 </label>
               </div>
@@ -369,23 +365,36 @@ export function AuthDialog({
                   type="text"
                   value={humanAnswer}
                   onChange={(event) => setHumanAnswer(event.target.value)}
-                  placeholder={registrationChallenge ? registrationChallenge.question : 'Preparando reto...'}
+                  placeholder={
+                    registrationChallenge ? registrationChallenge.question : 'Preparando reto...'
+                  }
                   required
                 />
               </label>
 
-              <button className="button button--primary" type="submit" disabled={registrationSubmitting}>
+              <button
+                className="button button--primary"
+                type="submit"
+                disabled={registrationSubmitting}
+              >
                 {registrationSubmitting ? 'Enviando codigo...' : 'Enviar codigo al email'}
               </button>
             </form>
 
-            {registrationMessage ? <p className="feedback auth-dialog__feedback">{registrationMessage}</p> : null}
+            {registrationMessage ? (
+              <p className="feedback auth-dialog__feedback">{registrationMessage}</p>
+            ) : null}
             {activeRegisterError ? (
-              <p className="feedback feedback--error auth-dialog__feedback">{activeRegisterError}</p>
+              <p className="feedback feedback--error auth-dialog__feedback">
+                {activeRegisterError}
+              </p>
             ) : null}
 
             {pendingRegistrationEmail ? (
-              <form className="form-grid auth-dialog__verification" onSubmit={handleVerificationSubmit}>
+              <form
+                className="form-grid auth-dialog__verification"
+                onSubmit={handleVerificationSubmit}
+              >
                 <div className="auth-dialog__verification-copy">
                   <strong>Verifica tu email</strong>
                   <p>
@@ -407,7 +416,11 @@ export function AuthDialog({
                   />
                 </label>
 
-                <button className="button button--primary" type="submit" disabled={registrationSubmitting}>
+                <button
+                  className="button button--primary"
+                  type="submit"
+                  disabled={registrationSubmitting}
+                >
                   {registrationSubmitting ? 'Verificando...' : 'Verificar y crear cuenta'}
                 </button>
               </form>
