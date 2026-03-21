@@ -25,7 +25,9 @@ export function UserPanel({ user, token, onLogout }: UserPanelProps) {
         <div className="user-card">
           <div>
             <span className="muted-text">Nombre</span>
-            <strong>{user.name} {user.surname || ''}</strong>
+            <strong>
+              {user.name} {user.surname || ''}
+            </strong>
           </div>
           <div>
             <span className="muted-text">Email</span>
