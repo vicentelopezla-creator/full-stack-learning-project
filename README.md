@@ -6,6 +6,7 @@ Proyecto full stack para una plataforma educativa con backend en FastAPI y front
 
 - Backend con autenticacion por token, validacion de sesion, carrito, cursos, categorias, videos y flujo de registro verificado por email.
 - Frontend con encabezado responsive, menu lateral para movil, login, registro en dos pasos y bloque de usuario con menu para cerrar sesion.
+- El frontend ya fue refactorizado para dejar `App.tsx` como coordinador y mover navegacion y layout a componentes dedicados.
 - Si no se configura SMTP, los codigos de verificacion del registro se guardan como vista previa en `BACKEND/tmp/emails`.
 
 ## Estructura del repositorio
@@ -57,6 +58,12 @@ npm run dev
    - el encabezado muestra sus iniciales,
    - se presenta primer nombre + primer apellido,
    - el bloque del usuario despliega un menu con `Cerrar sesion`.
+
+## Estado de retomada
+
+- La rama de trabajo actual es `feature/frontend-types-refactor`.
+- El refactor del frontend y su documentacion quedaron verificados y sincronizados con GitHub.
+- Si quieres retomar rapido el contexto operativo, revisa primero [PROJECT_MEMORY.md](c:/App/VLANDA/projects_python/full-stack/PROJECT_MEMORY.md).
 
 ## Documentacion disponible
 
