@@ -2,7 +2,7 @@
 
 ## Fecha de actualizacion
 
-- 2026-03-20
+- 2026-04-06
 
 ## Estado general
 
@@ -60,6 +60,16 @@ Proyecto full stack para academia online.
   - el bloque del usuario despliega un menu con `Cerrar sesion`.
 - `src/lib/api.ts` ya devuelve un mensaje de error mas claro cuando el navegador no puede conectar con el backend.
 
+### Frontend - refactor de estructura
+
+- `src/App.tsx` ahora coordina estado, efectos y flujo de autenticacion en lugar de contener toda la maqueta.
+- `src/components/Topbar.tsx` concentra el header, el menu de perfil y el drawer movil.
+- `src/components/CatalogFilters.tsx` evita mantener dos versiones del filtro y la busqueda.
+- `src/components/AcademyBrand.tsx` centraliza marca, logo y copy visual.
+- `src/components/HeroSection.tsx` y `src/components/AppFooter.tsx` sacan bloques grandes de presentacion fuera del componente raiz.
+- `src/lib/user.ts` encapsula nombre visible e iniciales del usuario.
+- Se separo `catalogError` de `sessionError` para no mezclar fallos del catalogo con fallos de autenticacion.
+
 ## Archivos clave recientes
 
 ### Backend
@@ -76,9 +86,15 @@ Proyecto full stack para academia online.
 ### Frontend
 
 - `FRONTEND/src/App.tsx`
+- `FRONTEND/src/components/Topbar.tsx`
+- `FRONTEND/src/components/CatalogFilters.tsx`
+- `FRONTEND/src/components/AcademyBrand.tsx`
+- `FRONTEND/src/components/HeroSection.tsx`
+- `FRONTEND/src/components/AppFooter.tsx`
 - `FRONTEND/src/components/AuthDialog.tsx`
 - `FRONTEND/src/components/UserPanel.tsx`
 - `FRONTEND/src/lib/api.ts`
+- `FRONTEND/src/lib/user.ts`
 - `FRONTEND/src/services/auth.ts`
 - `FRONTEND/src/types/auth.ts`
 - `FRONTEND/src/styles.css`

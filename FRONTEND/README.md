@@ -13,12 +13,34 @@ La aplicacion ya incluye:
 - encabezado responsive con drawer para movil,
 - bloque de usuario en el header con menu para `Cerrar sesion`.
 
+## Refactor reciente de estructura
+
+Se reorganizo el frontend para que `App.tsx` quede como coordinador y no como archivo gigante de maquetacion.
+
+- `src/components/Topbar.tsx`: concentra la navegacion, el perfil y el drawer movil.
+- `src/components/CatalogFilters.tsx`: reutiliza filtro por categoria y buscador en escritorio y movil.
+- `src/components/AcademyBrand.tsx`: evita duplicar la marca y el logo.
+- `src/components/HeroSection.tsx`: separa el bloque visual de resumen tecnico.
+- `src/components/AppFooter.tsx`: deja el cierre de pagina fuera del componente raiz.
+- `src/lib/user.ts`: centraliza nombre visible e iniciales del usuario.
+
+Por que se hizo:
+
+- para reducir el tamano de `App.tsx`,
+- para evitar duplicacion entre header de escritorio y drawer movil,
+- para facilitar el siguiente paso hacia rutas reales y mas vistas,
+- para dejar una arquitectura mas clara de cara a GitHub y colaboracion.
+
 ## Archivos clave
 
 - `.env.example`: URL base de la API.
-- `src/App.tsx`: coordinacion principal de estado, header, dialogos y sesion.
+- `src/App.tsx`: coordinacion principal de estado y efectos globales.
+- `src/components/Topbar.tsx`: encabezado responsive completo.
+- `src/components/CatalogFilters.tsx`: filtros compartidos del catalogo.
+- `src/components/HeroSection.tsx`: hero y estadisticas.
 - `src/components/AuthDialog.tsx`: login y registro verificado.
 - `src/components/UserPanel.tsx`: panel lateral del usuario autenticado.
+- `src/lib/user.ts`: helpers de nombre visible e iniciales.
 - `src/lib/api.ts`: cliente base HTTP y manejo de errores.
 - `src/lib/storage.ts`: token en `localStorage`.
 - `src/services/auth.ts`: login, usuario actual y endpoints de registro.

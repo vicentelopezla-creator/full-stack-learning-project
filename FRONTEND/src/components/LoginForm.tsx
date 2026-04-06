@@ -31,6 +31,7 @@ export function LoginForm({ isSubmitting, error, onSubmit }: LoginFormProps) {
           <span>Email</span>
           <input
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="tu-correo@ejemplo.com"
@@ -42,6 +43,7 @@ export function LoginForm({ isSubmitting, error, onSubmit }: LoginFormProps) {
           <span>Password</span>
           <input
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Escribe tu password"
