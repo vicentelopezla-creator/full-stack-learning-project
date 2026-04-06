@@ -12,6 +12,15 @@ export type RegistrationChallenge = {
   question: string;
 };
 
+export type RegistrationFormValues = {
+  name: string;
+  surname: string;
+  email: string;
+  password: string;
+  consentAccepted: boolean;
+  humanAnswer: string;
+};
+
 export type RegistrationRequestPayload = {
   name: string;
   surname: string;

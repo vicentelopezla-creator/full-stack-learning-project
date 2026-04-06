@@ -1,741 +1,1453 @@
-# Documentacion explicativa del FRONTEND
+# Guia didactica del FRONTEND
 
-## 1. Vision general
+## 1. Objetivo de este documento
 
-Este frontend fue creado como base moderna para consumir tu backend en FastAPI. La idea principal es que tengas una estructura clara, profesional y facil de ampliar mientras avanzas en tu curso de API RESTful.
+Este documento explica el `FRONTEND` como si estuvieramos en una clase:
 
-La base usa:
+- que carpeta y archivo existe,
+- para que sirve,
+- por que existe,
+- que parte participa hoy en la pantalla actual,
+- y cual es el flujo real desde que abres `http://127.0.0.1:5173` hasta que interactuas con la interfaz.
 
-- React para construir la interfaz.
-- Vite para el entorno de desarrollo y empaquetado.
-- TypeScript para trabajar con tipos y reducir errores al consumir la API.
+La idea no es solo describir archivos. La idea es ayudarte a pensar como desarrollador frontend.
 
-El objetivo no fue crear una plantilla vacia, sino dejar una primera version util que ya:
+## 2. La idea central que debes entender primero
 
-- consulta el estado de la API,
-- carga categorias,
-- carga cursos,
-- permite iniciar sesion,
-- recupera la sesion desde un token guardado,
-- permite registrarse con verificacion por email.
+Antes de leer archivo por archivo, quedate con esta idea:
 
-## 1.1 Actualizacion funcional reciente
+1. `main.tsx` arranca React.
+2. `App.tsx` coordina casi toda la aplicacion actual.
+3. `components/` pinta interfaz reutilizable.
+4. `services/` habla con el backend.
+5. `lib/` guarda utilidades compartidas.
+6. `types/` define la forma de los datos.
+7. `styles.css` da el aspecto visual y responsive.
 
-En la iteracion mas reciente se incorporaron estos cambios importantes:
+Si entiendes esa separacion, ya tienes la mitad del proyecto dominada.
 
-- dialogo de autenticacion responsive para `Iniciar sesion` y `Registrate`,
-- registro en dos pasos con consentimiento de datos, reto humano y codigo de verificacion,
-- menu de cuenta en el encabezado para cerrar sesion,
-- encabezado responsive con drawer lateral para movil,
-- mensajes de error de red mas claros cuando el frontend no logra conectar con FastAPI.
+## 2.5. Refactor reciente de estructura
 
-## 2. Por que se eligio React + Vite + TypeScript
+En esta iteracion se hizo un refactor importante para que `App.tsx` dejara de ser un archivo "todo en uno".
 
-### React
+Los cambios clave fueron:
 
-React es una opcion moderna, muy extendida y excelente para proyectos que consumen APIs REST. Permite crear componentes reutilizables y escalar desde una pantalla simple hasta una aplicacion completa con paneles, autenticacion y flujos mas complejos.
+- `App.tsx` ahora coordina estado, efectos y flujo de autenticacion.
+- `Topbar.tsx` concentra el header, el menu de perfil y el drawer movil.
+- `CatalogFilters.tsx` reutiliza filtro y busqueda en escritorio y movil.
+- `AcademyBrand.tsx` evita duplicar logo y copy de marca.
+- `HeroSection.tsx` y `AppFooter.tsx` sacan bloques grandes de presentacion fuera del componente raiz.
+- `lib/user.ts` encapsula nombre visible e iniciales del usuario.
 
-### Vite
+Por que este cambio es importante:
 
-Vite acelera mucho el desarrollo porque inicia rapido y ofrece recarga inmediata durante los cambios. Es una de las herramientas mas recomendadas hoy para proyectos frontend modernos.
+- reduce el tamano mental de `App.tsx`,
+- evita que header y drawer diverjan con el tiempo,
+- facilita introducir `React Router` mas adelante,
+- deja una arquitectura mas clara para GitHub y colaboracion.
 
-### TypeScript
+## 3. Regla mental mas importante
 
-TypeScript ayuda a que el frontend se alinee mejor con los esquemas del backend. Como tu API ya define estructuras claras para usuarios, categorias, cursos y autenticacion, usar tipos en frontend hace que todo sea mas mantenible.
+El flujo de datos principal del proyecto es este:
 
-## 3. Estructura general creada
+```text
+Usuario -> evento en la UI -> handler en App.tsx -> servicio -> apiRequest -> backend
+backend -> respuesta JSON -> setState en App.tsx -> React re-renderiza -> UI actualizada
+```
 
-La carpeta `FRONTEND/` contiene estos archivos principales:
+Esto es lo mas importante que debes aprender del frontend actual.
 
+## 4. Mapa rapido del proyecto
+
+```text
+FRONTEND/
+|-- dist/
+|-- node_modules/
+|-- public/
+|-- src/
+|   |-- App.tsx
+|   |-- main.tsx
+|   |-- styles.css
+|   |-- vite-env.d.ts
+|   |-- assets/
+|   |-- components/
+|   |-- lib/
+|   |-- services/
+|   |-- styles/
+|   |-- types/
+|   `-- vendor/
+|-- .env
+|-- .env.example
+|-- .prettierignore
+|-- .prettierrc.json
+|-- eslint.config.js
+|-- frontend_explicacion.docx
+|-- frontend_explicacion.md
+|-- generate_frontend_docx.py
+|-- index.html
+|-- package-lock.json
+|-- package.json
+|-- README.md
+|-- tsconfig.app.json
+|-- tsconfig.app.tsbuildinfo
+|-- tsconfig.json
+|-- tsconfig.node.json
+|-- tsconfig.node.tsbuildinfo
+|-- vite.config.d.ts
+|-- vite.config.js
+`-- vite.config.ts
+```
+
+## 5. Que archivos son fuente de verdad y cuales no
+
+No todos los archivos tienen la misma importancia.
+
+### Fuente de verdad principal
+
+- `src/App.tsx`
+- `src/main.tsx`
+- `src/styles.css`
+- `src/components/*`
+- `src/lib/*`
+- `src/services/*`
+- `src/types/*`
 - `package.json`
 - `vite.config.ts`
-- `tsconfig.json`
-- `tsconfig.app.json`
-- `tsconfig.node.json`
+- `tsconfig*.json`
+- `.env`
 - `.env.example`
-- `index.html`
-- `README.md`
-- `generate_frontend_docx.py`
-- `frontend_explicacion.md`
+
+### Archivos generados o auxiliares
+
+- `dist/`
+- `node_modules/`
+- `tsconfig.app.tsbuildinfo`
+- `tsconfig.node.tsbuildinfo`
+- `vite.config.js`
+- `vite.config.d.ts`
 - `frontend_explicacion.docx`
 
-Dentro de `src/` la estructura esta separada por responsabilidades:
+### Lo mas importante a tomar en cuenta
 
-- `App.tsx`
-- `main.tsx`
-- `styles.css`
-- `components/`
-- `services/`
-- `lib/`
-- `types/`
+- Cuando estudies el funcionamiento, enfocate primero en `src/`.
+- `dist/` no es el codigo que editas.
+- `node_modules/` no se toca salvo casos muy especiales.
+- En desarrollo, Vite sirve el proyecto directamente desde `src/`; no usa `dist/`.
 
-## 4. Explicacion archivo por archivo
+## 6. Explicacion de cada carpeta y archivo en la raiz
 
-### `package.json`
+### `dist/`
 
-Define el proyecto frontend y sus dependencias.
+Es la salida de `npm run build`.
 
-Incluye:
+Para que sirve:
 
-- `react`
-- `react-dom`
-- `vite`
-- `typescript`
-- `@vitejs/plugin-react`
-- tipos de React
+- guarda el frontend ya compilado para produccion.
 
-Tambien incluye scripts:
+Por que existe:
 
-- `npm run dev`
-- `npm run build`
-- `npm run preview`
+- Vite necesita generar una version empaquetada del proyecto.
 
-Este archivo es la puerta de entrada para instalar dependencias y ejecutar el proyecto.
+Importante:
 
-### `vite.config.ts`
+- cuando abres `http://127.0.0.1:5173`, normalmente NO se esta usando `dist/`;
+- Vite sirve el codigo fuente en caliente.
 
-Configura Vite.
+### `node_modules/`
 
-En esta base:
+Es la carpeta donde `npm install` guarda las dependencias.
 
-- activa el plugin de React,
-- define el puerto `5173`,
-- habilita acceso por host local.
+Para que sirve:
 
-Se eligio ese puerto porque es el valor comun de Vite y ademas se alineo el backend con CORS para ese origen.
+- contiene React, Vite, TypeScript, ESLint y todas las librerias instaladas.
+
+Por que existe:
+
+- el proyecto no puede ejecutarse sin esas dependencias.
+
+Importante:
+
+- no debes estudiar la arquitectura del proyecto dentro de `node_modules/`;
+- debes estudiar tu codigo, no el de terceros.
+
+### `public/`
+
+Hoy solo contiene `.gitkeep`.
+
+Para que sirve:
+
+- Vite usa `public/` para archivos estaticos que quieres servir tal cual.
+
+Por que existe:
+
+- deja preparado el proyecto para favicons, manifiestos o archivos estaticos futuros.
+
+### `.env`
+
+Es la configuracion real del frontend en tu maquina.
+
+Para que sirve:
+
+- define `VITE_API_BASE_URL`.
+
+Por que existe:
+
+- evita escribir la URL del backend de forma fija en muchos archivos.
 
 ### `.env.example`
 
-Sirve como ejemplo de configuracion para la URL base de la API:
+Es la plantilla publica del `.env`.
 
-- `VITE_API_BASE_URL=http://127.0.0.1:8000`
+Para que sirve:
 
-Esto evita dejar la URL fija en muchos archivos. Si en el futuro cambias el puerto o despliegas la API en otro entorno, solo tendras que ajustar esta configuracion.
+- muestra que variable necesita el frontend.
+
+Por que existe:
+
+- facilita clonar el proyecto y configurarlo rapido.
+
+### `.prettierignore`
+
+Le dice a Prettier que no debe formatear.
+
+### `.prettierrc.json`
+
+Define reglas de formato automatico.
+
+### `eslint.config.js`
+
+Configura ESLint.
+
+Para que sirve:
+
+- ayuda a detectar errores y malas practicas en TypeScript y React.
+
+Importante:
+
+- ignora `dist`, `node_modules`, `src/assets` y `*.tsbuildinfo`;
+- esto tiene sentido porque `src/assets` contiene muchos recursos heredados y no codigo TS/TSX.
+
+### `frontend_explicacion.md`
+
+Es este documento.
+
+Para que sirve:
+
+- documentar la arquitectura y el flujo del frontend.
+
+### `frontend_explicacion.docx`
+
+Es la version Word generada desde el Markdown.
+
+Importante:
+
+- no es la fuente principal;
+- la fuente principal es `frontend_explicacion.md`.
+
+### `generate_frontend_docx.py`
+
+Script que convierte el Markdown en `.docx`.
+
+Para que sirve:
+
+- automatiza la generacion del documento Word.
+
+Por que existe:
+
+- evita tener que mantener dos documentos a mano.
 
 ### `index.html`
 
-Es el documento base que carga el frontend. Contiene el nodo `root` donde React monta toda la aplicacion.
+Es el HTML base de entrada.
+
+Para que sirve:
+
+- contiene el elemento `root` donde React monta toda la app.
+
+Lo mas importante:
+
+- aqui no esta la pagina completa;
+- aqui solo esta el contenedor donde React va a dibujar la interfaz.
+
+### `package-lock.json`
+
+Bloquea las versiones exactas de dependencias instaladas.
+
+Para que sirve:
+
+- garantiza instalaciones mas consistentes entre equipos.
+
+### `package.json`
+
+Es el manifiesto del frontend.
+
+Para que sirve:
+
+- define nombre del proyecto,
+- dependencias,
+- devDependencies,
+- scripts de trabajo.
+
+Lo mas importante:
+
+- `npm run dev` levanta Vite,
+- `npm run build` compila,
+- `npm run preview` prueba la build,
+- `npm run lint` revisa el codigo,
+- `npm run format` formatea.
+
+Detalle clave:
+
+- hoy NO aparece `react-router-dom`, por eso la aplicacion actual no tiene navegacion por rutas reales.
+
+### `README.md`
+
+Guia breve para levantar el frontend y recordar el flujo actual.
+
+### `tsconfig.json`
+
+Archivo maestro de TypeScript.
+
+Para que sirve:
+
+- referencia configuraciones separadas para app y entorno de Node.
+
+### `tsconfig.app.json`
+
+Configuracion TypeScript para el codigo de `src`.
+
+Lo mas importante:
+
+- `strict: true` obliga a programar con mas seguridad;
+- `jsx: react-jsx` permite TSX moderno;
+- `noEmit: true` indica que aqui solo se valida tipo, no se emite JS final.
+
+### `tsconfig.node.json`
+
+Configuracion TypeScript para archivos de entorno Node como `vite.config.ts`.
+
+### `tsconfig.app.tsbuildinfo`
+
+Cache incremental de TypeScript para la app.
+
+### `tsconfig.node.tsbuildinfo`
+
+Cache incremental de TypeScript para la parte de Node.
+
+### `vite.config.ts`
+
+Es la configuracion principal de Vite.
+
+Para que sirve:
+
+- activa el plugin de React,
+- define host,
+- define puerto `5173`.
+
+### `vite.config.js`
+
+Version JavaScript generada o derivada de la configuracion.
+
+### `vite.config.d.ts`
+
+Archivo de tipos asociado a la configuracion.
+
+Importante:
+
+- normalmente debes editar `vite.config.ts`, no estas salidas auxiliares.
+
+## 7. Explicacion de la carpeta `src/`
+
+`src/` es el corazon real del frontend.
 
 ### `src/main.tsx`
 
-Es el punto de arranque del frontend.
+Es el punto de entrada de React.
 
-Su trabajo es:
+Hace cuatro cosas:
 
-1. importar React,
-2. importar `App.tsx`,
-3. importar los estilos globales,
-4. montar la aplicacion en el nodo `root`.
+1. importa React,
+2. importa `App`,
+3. importa `styles.css`,
+4. monta la app dentro de `#root`.
+
+Detalle muy importante:
+
+- `App` esta envuelto en `React.StrictMode`.
+
+Esto significa que en desarrollo React puede ejecutar ciertos ciclos mas de una vez para ayudarte a detectar efectos secundarios inseguros.
+
+Aprendizaje clave:
+
+- si ves dobles peticiones en desarrollo, no siempre significa un bug del backend;
+- a veces estas viendo el efecto de `StrictMode`.
 
 ### `src/App.tsx`
 
-Es el centro de la aplicacion actual.
+Es el coordinador central de la aplicacion actual.
 
-Aqui se coordina todo el flujo inicial:
+Esta es, sin duda, la pieza que mas debes estudiar.
 
-1. consultar `GET /health`,
-2. consultar `GET /categories/`,
-3. consultar `GET /products/`,
-4. recuperar token guardado,
-5. consultar `GET /auth/me` si existe token,
-6. manejar login desde `POST /auth/login`,
-7. mostrar datos en componentes visuales.
+#### Que hace `App.tsx`
 
-Se eligio centralizar la primera version aqui porque te permite entender el flujo completo sin repartir demasiada logica desde el principio.
+- carga datos publicos,
+- recupera sesion,
+- consulta carrito,
+- maneja login,
+- maneja registro con codigo,
+- controla estados globales de navegacion y overlays,
+- filtra cursos por categoria y busqueda,
+- reparte datos a componentes como `Topbar`, `HeroSection`, `AuthDialog` y el contenido principal.
 
-En el estado actual, `App.tsx` tambien cumple estas funciones:
+#### Por que esta tanta logica aqui
 
-- renderiza el encabezado principal del sitio,
-- administra la categoria seleccionada,
-- ejecuta la busqueda de cursos en memoria,
-- calcula el contador del carrito cuando hay sesion,
-- abre el dialogo de autenticacion,
-- coordina el registro por codigo,
-- muestra el bloque de usuario autenticado con menu desplegable,
-- compone el footer global.
+Porque el proyecto todavia esta en una etapa de una sola pantalla principal.
+
+No hay router todavia, asi que `App.tsx` funciona como:
+
+- coordinador de estado,
+- shell principal de la pantalla,
+- y punto de integracion entre servicios y componentes.
+
+Detalle importante:
+
+- despues del refactor, `App.tsx` ya no contiene el marcado grande del header, el drawer y el hero;
+- ahora esos bloques viven en componentes dedicados.
+
+#### Grupos de estado mas importantes dentro de `App.tsx`
+
+Estado de datos:
+
+- `healthStatus`
+- `catalogError`
+- `categories`
+- `courses`
+- `loadingCatalog`
+
+Estado de sesion:
+
+- `user`
+- `token`
+- `loggingIn`
+- `loginError`
+- `sessionError`
+
+Estado del encabezado y navegacion local:
+
+- `selectedCategoryId`
+- `searchDraft`
+- `searchTerm`
+- `cartCount`
+- `isMenuOpen`
+- `isAuthDialogOpen`
+- `isProfileMenuOpen`
+
+Estado del registro:
+
+- `authDialogMode`
+- `registering`
+- `registrationError`
+- `registrationMessage`
+- `registrationChallenge`
+- `pendingRegistrationEmail`
+
+Estado de referencias:
+
+- `profileMenuRef`
+
+#### Dos detalles muy didacticos que debes aprender aqui
+
+`searchDraft` vs `searchTerm`:
+
+- `searchDraft` guarda lo que el usuario escribe;
+- `searchTerm` se actualiza cuando el usuario envia el formulario.
+
+Eso ensena una tecnica comun: separar el texto tecleado del filtro ya confirmado.
+
+`user` y `token`:
+
+- `token` representa autenticacion tecnica;
+- `user` representa la identidad cargada desde backend.
+
+No son exactamente lo mismo, y esa diferencia es importante.
 
 ### `src/styles.css`
 
-Contiene el estilo visual base del frontend.
+Es la hoja de estilos global principal.
 
-La interfaz se diseno para que no se vea como una plantilla vacia:
+Para que sirve:
 
-- tarjetas,
-- paneles,
-- tipografia clara,
-- bloques visuales para metricas,
-- grid responsive,
-- estilo util tanto en escritorio como en movil.
+- da forma al layout,
+- define el header,
+- define el drawer,
+- define el dialogo de autenticacion,
+- define la grilla del contenido,
+- define responsive.
 
-La intencion fue que desde el primer dia el proyecto se sienta como una aplicacion real.
+Importante:
 
-Despues se fue ampliando para cubrir:
+- hoy la UI principal depende de este archivo;
+- el CSS heredado del template no esta cargado globalmente por defecto.
 
-- encabezado global,
-- barra de acciones principal,
-- dialogo de autenticacion,
-- drawer lateral para movil,
-- menu desplegable de cuenta,
-- footer,
-- refinamiento responsive.
+### `src/vite-env.d.ts`
 
-## 5. Carpeta `src/lib/`
+Es un archivo pequeno pero importante.
 
-### `src/lib/api.ts`
+Para que sirve:
 
-Este archivo concentra la logica base para hacer peticiones HTTP.
+- le dice a TypeScript que entienda los tipos de Vite, incluyendo `import.meta.env`.
 
-Su funcion es:
+## 8. Explicacion de `src/components/`
 
-- leer la URL base desde `VITE_API_BASE_URL`,
-- construir la URL final,
+La carpeta `components/` contiene piezas visuales reutilizables.
+
+Piensa asi:
+
+- `App.tsx` decide y coordina,
+- los componentes muestran y emiten eventos.
+
+### `components/Topbar.tsx`
+
+Es el componente que concentra la navegacion principal.
+
+Para que sirve:
+
+- renderizar el header de escritorio,
+- renderizar el drawer movil,
+- mostrar buscador, filtro, carrito y bloque de usuario.
+
+Por que existe:
+
+- evita que `App.tsx` mezcle logica con mucho marcado visual,
+- mantiene en un solo sitio la navegacion responsive.
+
+### `components/CatalogFilters.tsx`
+
+Extrae el filtro de categorias y la busqueda del catalogo.
+
+Para que sirve:
+
+- compartir el mismo bloque de filtros entre escritorio y movil.
+
+Por que existe:
+
+- evita duplicar JSX,
+- reduce el riesgo de que una version quede distinta de la otra.
+
+### `components/AcademyBrand.tsx`
+
+Encapsula la identidad visual de la academia.
+
+Para que sirve:
+
+- renderizar logo, nombre y subtitulo de la marca.
+
+Por que existe:
+
+- evita repetir la marca en header y drawer.
+
+### `components/HeroSection.tsx`
+
+Extrae el bloque superior de presentacion y estadisticas.
+
+Para que sirve:
+
+- mostrar el mensaje principal del frontend,
+- mostrar los `StatCard` con salud y datos del catalogo.
+
+Por que existe:
+
+- deja el arranque de la pagina mas modular.
+
+### `components/AppFooter.tsx`
+
+Extrae el pie de pagina.
+
+Para que sirve:
+
+- cerrar la pantalla principal con un componente pequeno y estable.
+
+### `components/AuthDialog.tsx`
+
+Es el componente mas importante despues de `App.tsx`.
+
+Para que sirve:
+
+- mostrar el dialogo de login y registro,
+- alternar entre modo `login` y `register`,
+- recoger datos del usuario,
+- validar parte del formulario en cliente,
+- pedir el codigo,
+- pedir la verificacion final.
+
+Por que existe:
+
+- encapsula una UI compleja que seria dificil de mantener dentro de `App.tsx`.
+
+Lo mas importante que debes aprender aqui:
+
+- componentes controlados,
+- `useState` local para campos del formulario,
+- `useEffect` para enfocar inputs,
+- `useRef` para foco inicial,
+- comunicacion por props con el padre.
+
+Importante:
+
+- `AuthDialog` NO llama directamente al backend;
+- usa callbacks recibidos desde `App.tsx`.
+
+Eso es una excelente practica para separar presentacion de coordinacion.
+
+### `components/CategoryList.tsx`
+
+Muestra categorias en formato visual simple.
+
+Para que sirve:
+
+- renderizar categorias ya cargadas.
+
+Aprendizaje:
+
+- componente puramente presentacional.
+
+### `components/CourseList.tsx`
+
+Muestra los cursos filtrados.
+
+Para que sirve:
+
+- pintar tarjetas de cursos,
+- traducir `category_id` a nombre de categoria usando el array recibido.
+
+Aprendizaje:
+
+- un componente puede necesitar combinar dos props distintas para renderizar mejor.
+
+Importante:
+
+- no filtra cursos por si mismo;
+- recibe los cursos ya filtrados desde `App.tsx`.
+
+### `components/LoginForm.tsx`
+
+Es un segundo punto de entrada para login.
+
+Esto es muy importante de entender.
+
+Hoy existen dos formas visuales de iniciar sesion:
+
+1. el dialogo del header,
+2. el panel lateral `LoginForm`.
+
+Ambos terminan usando la misma logica `handleLogin` del padre.
+
+Aprendizaje muy importante:
+
+- una misma logica de negocio puede reutilizarse en varias UIs distintas.
+
+### `components/StatCard.tsx`
+
+Componente pequeno de estadistica o estado.
+
+Para que sirve:
+
+- mostrar API,
+- total de categorias,
+- total de cursos,
+- URL base.
+
+### `components/UserPanel.tsx`
+
+Muestra el estado del usuario autenticado.
+
+Para que sirve:
+
+- ensenar visualmente quien esta logueado,
+- mostrar email, rol y token parcial,
+- ofrecer logout.
+
+Importante:
+
+- si `user` es `null`, muestra estado vacio;
+- si hay `user`, muestra datos reales.
+
+## 9. Explicacion de `src/lib/`
+
+`lib/` guarda utilidades base compartidas.
+
+### `lib/api.ts`
+
+Es una de las piezas mas importantes del proyecto.
+
+Para que sirve:
+
+- leer `VITE_API_BASE_URL`,
+- construir URLs,
 - enviar `fetch`,
-- adjuntar `Authorization: Bearer ...` cuando haya token,
-- manejar errores HTTP de forma centralizada.
+- agregar `Authorization` si hay token,
+- manejar JSON,
+- centralizar errores,
+- soportar `FormData` para subidas de archivos.
 
-Esto evita repetir codigo en cada componente.
+Lo mas importante que debes aprender:
 
-### `src/lib/storage.ts`
+- si centralizas la capa HTTP, el resto del frontend queda mas limpio;
+- no quieres repetir `fetch` con headers en cada componente.
 
-Se encarga de guardar, leer y eliminar el token del navegador usando `localStorage`.
+Detalle tecnico importante:
 
-Esto es importante porque el usuario puede iniciar sesion una vez y mantener la sesion incluso si recarga la pagina.
+- si el body es `FormData`, no fuerza `Content-Type: application/json`;
+- eso es correcto, porque el navegador debe construir el boundary de `multipart/form-data`.
 
-## 6. Carpeta `src/services/`
+### `lib/storage.ts`
 
-Esta carpeta separa la comunicacion con la API por dominio funcional.
+Encapsula `localStorage`.
 
-### `src/services/auth.ts`
+Para que sirve:
 
-Contiene funciones relacionadas con autenticacion:
+- leer el token,
+- guardar el token,
+- borrar el token.
 
-- `login()`
-- `getCurrentUser()`
-- `getRegistrationChallenge()`
-- `requestRegistrationCode()`
-- `verifyRegistrationCode()`
+Por que existe:
 
-De esta manera, los componentes no hacen llamadas HTTP directas con detalles de rutas y headers. Solo invocan funciones de negocio frontend.
+- evita repetir la clave de almacenamiento en muchos sitios.
 
-### `src/services/catalog.ts`
+Aprendizaje:
 
-Contiene funciones publicas para consultar:
+- cuando el token vive en un modulo utilitario, es mas facil cambiar la estrategia despues.
 
-- salud del backend,
-- categorias,
-- cursos.
+### `lib/user.ts`
 
-Esto prepara una base ordenada para seguir agregando servicios despues, por ejemplo carrito, ventas, videos o panel del alumno.
+Encapsula helpers visuales del usuario autenticado.
 
-### `src/services/video.ts`
+Para que sirve:
 
-Contiene funciones para:
+- construir el nombre corto que aparece en el header,
+- calcular las iniciales del avatar.
 
-- listar videos,
-- obtener un video por id,
-- crear videos,
-- actualizar videos,
-- eliminar videos,
-- subir archivos con `FormData`,
-- construir la URL del archivo de video.
+Por que existe:
 
-Se creo porque el modulo de videos tiene rutas propias y ademas una necesidad especial de subida de archivos.
+- evita dejar reglas de presentacion reutilizable enterradas dentro de `App.tsx`.
 
-### `src/services/carrito.ts`
+## 10. Explicacion de `src/services/`
 
-Contiene funciones para:
+La carpeta `services/` representa la capa de acceso al backend.
 
-- listar el carrito del usuario,
-- agregar cursos al carrito.
+Regla mental:
 
-Se separo porque carrito es un dominio funcional distinto del catalogo.
+- un servicio sabe a que endpoint llamar;
+- el componente no deberia preocuparse por la URL exacta ni por los headers.
 
-### `src/services/venta.ts`
+### Servicios usados hoy por la pantalla principal
 
-Contiene funciones para:
+#### `services/auth.ts`
 
-- listar compras,
-- crear compras,
-- ejecutar checkout.
+Usado directamente por `App.tsx`.
 
-Esto prepara el frontend para la capa comercial del proyecto.
+Funciones:
 
-### `src/services/me.ts`
+- `login`
+- `getCurrentUser`
+- `getRegistrationChallenge`
+- `requestRegistrationCode`
+- `verifyRegistrationCode`
 
-Contiene funciones para:
+Por que existe:
 
-- listar cursos comprados por el alumno,
-- traer el contenido completo de un curso comprado.
+- concentra todo el flujo de autenticacion y registro.
 
-Este servicio representa el panel personal del usuario autenticado.
+#### `services/catalog.ts`
 
-### `src/services/checkbox.ts`
+Usado directamente por `App.tsx`.
 
-Contiene funciones para leer y crear estados de progreso por video.
+Funciones:
 
-### `src/services/commentary.ts`
+- `getHealth`
+- `getCategories`
+- `getCourses`
 
-Contiene funciones para listar y crear comentarios.
+Por que existe:
 
-### `src/services/response.ts`
+- separa el consumo del catalogo publico del resto del frontend.
 
-Contiene funciones para listar y crear respuestas asociadas a comentarios.
+#### `services/carrito.ts`
 
-Paso a paso, cada servicio fue agregado siguiendo esta regla:
+Usado directamente por `App.tsx`.
 
-1. mirar las rutas reales del backend,
-2. identificar el tipo TypeScript de entrada o salida,
-3. crear funciones pequeñas por endpoint,
-4. mantener los componentes libres de llamadas HTTP directas.
+Funciones:
 
-## 7. Carpeta `src/types/`
+- `getCarrito`
+- `createCarritoItem`
 
-Aqui se definieron tipos TypeScript inspirados en los esquemas del backend.
+Importante:
 
-La decision actual fue separar los modelos por dominio, en lugar de dejarlos todos en un solo archivo. Esto hace que el proyecto escale mejor y facilita encontrar rapidamente cada estructura.
+- hoy `App.tsx` usa `getCarrito` para calcular el contador del header;
+- todavia no existe una pagina real de carrito.
 
-### `src/types/user.ts`
+### Servicios preparados para futuras vistas
 
-Contiene los modelos de usuario:
+Estos archivos ya existen, aunque la pantalla principal actual todavia no los usa:
 
-- `UserBase`
-- `UserCreate`
-- `User`
+#### `services/video.ts`
 
-Se usan para diferenciar:
+Gestiona videos:
 
-- datos base del usuario,
-- datos necesarios para registro,
-- datos completos que devuelve la API.
+- listar,
+- obtener uno,
+- crear,
+- actualizar,
+- borrar,
+- subir archivo,
+- construir URL del archivo.
 
-### `src/types/auth.ts`
+#### `services/venta.ts`
 
-Contiene:
+Gestiona compras:
 
+- listar ventas,
+- crear venta,
+- hacer checkout.
+
+#### `services/me.ts`
+
+Gestiona datos privados del alumno:
+
+- cursos comprados,
+- contenido de un curso comprado.
+
+#### `services/checkbox.ts`
+
+Gestiona progreso de marcado o avance por video.
+
+#### `services/commentary.ts`
+
+Gestiona comentarios.
+
+#### `services/response.ts`
+
+Gestiona respuestas a comentarios.
+
+### Lo mas importante a tomar en cuenta
+
+Cuando un proyecto crece, esta capa evita caos.
+
+Si manana cambias una ruta del backend, prefieres tocar:
+
+- un archivo de servicio,
+
+y no:
+
+- veinte componentes distintos.
+
+## 11. Explicacion de `src/types/`
+
+`types/` define contratos TypeScript por dominio.
+
+Eso significa que el frontend sabe como deberian verse los datos.
+
+### Tipos usados hoy por la pantalla principal
+
+#### `types/auth.ts`
+
+Define:
+
+- `AuthDialogMode`
 - `LoginRequest`
 - `LoginResponse`
-- `AuthDialogMode`
 - `RegistrationChallenge`
 - `RegistrationRequestPayload`
 - `RegistrationRequestResponse`
 - `RegistrationVerifyPayload`
 
-Separa claramente lo que el frontend envia o recibe tanto en login como en el registro verificado.
+Es clave para el flujo de login y registro.
 
-### `src/types/category.ts`
+#### `types/user.ts`
 
-Contiene:
+Define:
+
+- `UserBase`
+- `UserCreate`
+- `User`
+
+Importante:
+
+- `User` es lo que normalmente recibes del backend;
+- `UserCreate` representa datos para crear usuario.
+
+#### `types/category.ts`
+
+Define:
 
 - `CategoryCreate`
 - `CategoryUpdate`
 - `Category`
 
-Esto refleja que una misma entidad puede tener distintas formas segun si se crea, se actualiza o se muestra.
+#### `types/course.ts`
 
-### `src/types/course.ts`
-
-Contiene:
+Define:
 
 - `CourseBase`
 - `CourseCreate`
 - `CourseUpdate`
 - `Course`
 
-Se creo asi para reflejar los esquemas del backend y preparar el frontend para formularios de creacion y edicion.
+#### `types/carrito.ts`
 
-### `src/types/video.ts`
+Define carga y forma del carrito.
 
-Contiene:
+#### `types/health.ts`
 
-- `VideoCreate`
-- `VideoUpdate`
-- `Video`
+Define `HealthResponse`.
 
-Es la representacion del contenido audiovisual de los cursos.
+### Tipos preparados para futuras vistas
 
-### `src/types/carrito.ts`
+#### `types/video.ts`
 
-Contiene:
+Contratos del modulo de videos.
 
-- `CarritoCreate`
-- `Carrito`
+#### `types/venta.ts`
 
-Se separa el payload de creacion del objeto completo que responde la API.
+Contratos del modulo de ventas y checkout.
 
-### `src/types/venta.ts`
+#### `types/me.ts`
 
-Contiene:
+Contratos del panel del alumno.
 
-- `VentaCreate`
-- `Venta`
-- `CheckoutResult`
+#### `types/checkbox.ts`
 
-Sirve tanto para la compra directa como para el resultado del checkout.
+Contratos del progreso.
 
-### `src/types/checkbox.ts`
+#### `types/commentary.ts`
 
-Contiene:
+Contratos de comentarios.
 
-- `CheckboxCreate`
-- `Checkbox`
+#### `types/response.ts`
 
-Representa el estado de progreso por video.
+Contratos de respuestas.
 
-### `src/types/commentary.ts`
+### Por que esto es importante
 
-Contiene:
+Aprender TypeScript aqui significa aprender a pensar asi:
 
-- `CommentaryCreate`
-- `Commentary`
+- que datos envio,
+- que datos espero,
+- que puede ser `null`,
+- y que estructura real tiene la respuesta.
 
-Prepara el frontend para comentarios del curso o del video.
+## 12. Explicacion de `src/assets/`
 
-### `src/types/response.ts`
+Esta carpeta guarda recursos estaticos.
 
-Contiene:
+Pero aqui hay una distincion muy importante:
 
-- `ResponseCreate`
-- `Response`
+1. recursos realmente utiles hoy,
+2. recursos heredados del template,
+3. carpetas placeholder.
 
-Representa respuestas asociadas a comentarios.
+### `assets/README.md`
 
-### `src/types/me.ts`
+Explica que recursos visuales y de audio estan disponibles.
 
-Contiene:
+### `assets/images/`
 
-- `PurchasedCourse`
-- `VideoProgress`
-- `CourseContent`
+Guarda imagenes.
 
-Estos son modelos compuestos pensados para el panel del alumno y consumo de contenido comprado.
+Archivos importantes:
 
-### `src/types/health.ts`
+- `logo.png`: si se usa hoy en el header.
+- `default.jpg`, `default2.jpg`, `fondo1.jpg`, `matrix.gif`, `pildoras.gif`, `novideo.png`, `play.png`, `pause.png`, `slide1-1600x900.jpg`, `slide2-1600x900.jpg`, `slide3-1600x900.jpg`, `tooltip1.jpg`, `tooltip2.jpg`, `tooltip3.jpg`, `video-poster.jpg`: recursos disponibles para futuras secciones.
+- `hashes.json`: pequeno mapa auxiliar de hashes a nombres de imagenes.
 
-Contiene:
+Subcarpetas:
 
-- `HealthResponse`
+- `downloads/`, `general/`, `logos/`: hoy mantienen placeholders `.gitkeep`.
+- `ecommerce/checkout/`: contiene `cards.png` y `paypal-badge.png` para futuras pantallas de checkout.
 
-Es un modelo pequeno para la comprobacion de salud del backend.
+### `assets/sonidos/`
 
-Esta organizacion aporta tres ventajas:
+Contiene audios listos para usar:
 
-1. autocompletado,
-2. mayor seguridad al programar,
-3. mejor alineacion entre frontend y backend.
+- `caja-registradora dinero.mp3`
+- `carrito.mp3`
+- `carton.mp3`
+- `rayo.mp3`
+- `super.mp3`
 
-Paso a paso, cada modelo fue agregado tomando como referencia:
+Hoy no son parte critica del render principal, pero estan listos para interacciones futuras.
 
-1. el schema del backend,
-2. la forma real de entrada o salida de la API,
-3. el dominio funcional al que pertenece.
+### `assets/audio/`
 
-## 8. Carpeta `src/components/`
+Hoy solo contiene `.gitkeep`.
 
-En esta carpeta se crearon componentes reutilizables.
+### `assets/css/`
 
-### `LoginForm.tsx`
+Contiene CSS heredado y librerias auxiliares:
 
-Muestra el formulario de acceso.
+- `blue.css`
+- `green.css`
+- `red.css`
+- `style.css`
+- `iziToast.min.css`
+- subcarpeta `jquery-ui/` con varios archivos de esa libreria
 
-Recibe:
+Importante:
 
-- estado de carga,
-- posibles errores,
-- funcion para enviar email y password.
+- este CSS no es la base principal de la pantalla actual;
+- la pantalla actual depende sobre todo de `src/styles.css`.
 
-Su responsabilidad es solo la interfaz del login.
+### `assets/js/`
 
-### `AuthDialog.tsx`
+Contiene JavaScript heredado:
 
-Es el contenedor principal del flujo moderno de autenticacion.
+- `cleave.min.js`
+- `iziToast.min.js`
+- `main.js`
+- `sticky-sidebar.min.js`
+- `jquery-ui/` y sus archivos
 
-Incluye:
+Importante:
 
-- pestañas para login y registro,
-- formulario de login,
-- formulario de registro,
-- bloque de consentimiento de datos,
-- verificacion humana,
-- ingreso del codigo enviado por email.
+- este JS no es el motor principal de la app React actual.
 
-Su objetivo es centralizar el acceso desde el encabezado y mantener una experiencia coherente entre escritorio y movil.
+### `assets/assets1/`
 
-### `UserPanel.tsx`
+Es material heredado de un template:
 
-Muestra el usuario autenticado y el token parcial cuando la sesion esta activa. Tambien incorpora el boton de cerrar sesion.
+- CSS,
+- fuentes,
+- JS,
+- subcarpetas placeholder.
 
-### `CategoryList.tsx`
+Por que existe:
 
-Renderiza las categorias recibidas desde FastAPI.
+- conserva recursos del curso o plantilla original para reutilizar piezas despues.
 
-### `CourseList.tsx`
+Importante:
 
-Renderiza los cursos del endpoint `/products/` y muestra informacion importante como categoria, ventas, descripcion corta y enlace.
+- no esta integrado como dependencia global principal.
 
-### `StatCard.tsx`
+### `styles/`
 
-Es un componente visual pequeno para mostrar metricas o estados como:
+Hoy solo tiene `.gitkeep`.
 
-- estado de la API,
-- numero de categorias,
-- numero de cursos,
-- URL base configurada.
+Sirve como reserva para dividir CSS en el futuro si `styles.css` crece demasiado.
 
-Separar estas piezas en componentes hace que el proyecto sea mas legible y mas facil de crecer.
+### `vendor/`
 
-## 9. Flujo funcional actual
+Hoy solo tiene `.gitkeep`.
 
-Cuando el frontend arranca, ocurre este flujo:
+Sirve como posible ubicacion futura para librerias externas manuales.
 
-1. React monta `App.tsx`.
-2. Se lanzan peticiones publicas a:
-   - `/health`
-   - `/categories/`
-   - `/products/`
-3. Si existe un token guardado, se consulta `/auth/me`.
-4. Si el usuario usa el formulario de login, se envia la peticion a `/auth/login`.
-5. Si el login es correcto:
-   - se guarda el token,
-   - se actualiza el estado del usuario,
-   - el panel de sesion muestra los datos recibidos.
-6. Si el token falla, se elimina del almacenamiento local para evitar sesiones rotas.
+## 13. El flujo real cuando abres `http://127.0.0.1:5173`
 
-Este flujo cubre la base minima de una app conectada a una API real.
+Esta es la parte mas importante del documento.
 
-Ademas, si existe token:
+### Paso 1. El navegador habla con Vite
 
-7. se consulta el carrito,
-8. se calcula la suma de cantidades,
-9. se muestra ese total en el encabezado.
+Cuando abres `http://127.0.0.1:5173`, el navegador no carga una pagina HTML tradicional ya terminada.
 
-Y para el registro nuevo:
+Carga:
 
-10. `Registrate` solicita primero un reto humano al backend,
-11. el usuario completa nombre, apellido, email, password y consentimiento,
-12. el frontend solicita el codigo de verificacion,
-13. el backend guarda una solicitud pendiente y genera el codigo,
-14. el usuario introduce el codigo recibido,
-15. el backend verifica el codigo y devuelve token + usuario,
-16. el encabezado pasa a mostrar las iniciales y el nombre resumido del usuario.
+- `index.html`
 
-## 10. Ajuste realizado en el backend
+Ese HTML trae el contenedor `#root` y el script de entrada del proyecto.
 
-Para que el frontend pueda hablar con FastAPI desde `http://localhost:5173`, se actualizo `BACKEND/app/main.py` agregando `CORSMiddleware`.
+### Paso 2. Se ejecuta `src/main.tsx`
 
-Se permitieron estos origenes:
+`main.tsx`:
 
-- `http://localhost:5173`
-- `http://127.0.0.1:5173`
+- importa `App`,
+- importa los estilos globales,
+- monta React en `#root`.
 
-Sin este cambio, el navegador bloquearia las peticiones del frontend al backend.
+### Paso 3. React monta `App.tsx`
 
-## 11. Por que esta base es buena para crecer
+En este momento se crea la primera renderizacion con estados iniciales.
 
-Esta base fue pensada para que el siguiente paso sea natural. Desde aqui puedes agregar sin reorganizar todo:
+Eso significa que al inicio aun no tienes:
 
-- rutas con React Router,
-- pagina de inicio,
-- pagina de login separada,
-- pagina de cursos,
-- detalle de curso,
-- carrito,
-- checkout,
-- panel del alumno,
-- panel de administrador,
-- consumo de videos,
-- progreso de aprendizaje.
+- categorias cargadas,
+- cursos cargados,
+- usuario validado,
+- carrito calculado.
 
-La estructura ya esta separada de forma suficiente como para evolucionar con orden.
+Por eso React primero pinta una estructura inicial y luego la va completando.
 
-## 12. Como ejecutar el frontend cuando tengas Node.js
+### Paso 4. `App.tsx` lee el token desde `localStorage`
 
-Desde la carpeta `FRONTEND/`:
+El estado `token` se inicializa con:
 
-1. ejecutar `npm install`
-2. ejecutar `npm run dev`
+- `getStoredToken()`
 
-Luego abrir la URL que Vite muestre en consola, normalmente:
+Esto es clave.
 
-- `http://localhost:5173`
+Porque significa que el frontend intenta recuperar sesion desde el primer render.
 
-Y mantener el backend FastAPI levantado en:
+### Paso 5. Se dispara el efecto de datos publicos
 
-- `http://127.0.0.1:8000`
+`App.tsx` ejecuta un `useEffect` que llama en paralelo a:
 
-## 13. Instalaciones necesarias en el equipo
+- `/health`
+- `/categories/`
+- `/products/`
 
-Para continuar con el proyecto de manera profesional, se recomienda tener estas herramientas instaladas:
+Esas respuestas alimentan:
 
-### Node.js
+- `healthStatus`
+- `categories`
+- `courses`
 
-Es obligatorio para ejecutar Vite, instalar dependencias y compilar el frontend.
+Entonces la UI se vuelve mas completa despues de que llegan esos datos.
 
-Paso a paso:
+### Paso 6. Si hay token, se valida la sesion
 
-1. Entrar en la web oficial de Node.js.
-2. Descargar la version LTS para Windows.
-3. Ejecutar el instalador `.msi`.
-4. Seguir las opciones por defecto.
-5. Confirmar que Node se agregue al `PATH` si el instalador lo ofrece.
-6. Cerrar y volver a abrir PowerShell.
-7. Verificar con `node -v` y `npm -v`.
+Otro `useEffect` mira `token`.
 
-### Git for Windows
+Si existe:
 
-Es recomendable para control de versiones, historial de cambios y trabajo con ramas.
+- llama a `/auth/me`
 
-Paso a paso:
+Si la sesion es valida:
 
-1. Entrar en la web oficial de Git para Windows.
-2. Descargar el instalador.
-3. Ejecutarlo con las opciones por defecto.
-4. Abrir una nueva terminal.
-5. Verificar con `git --version`.
+- guarda `user`
+- limpia errores de sesion
 
-### Visual Studio Code
+Si la sesion falla:
 
-Es recomendable para editar, ejecutar terminal integrada, instalar extensiones y depurar.
+- borra token de `localStorage`
+- pone `token = null`
+- pone `user = null`
+- muestra error
 
-Paso a paso:
+Esto es muy importante.
 
-1. Entrar en la web oficial de Visual Studio Code.
-2. Descargar la version para Windows.
-3. Ejecutar el instalador.
-4. Activar la opcion para agregar `code` al `PATH` si aparece.
-5. Abrir una nueva terminal.
-6. Verificar con `code --version`.
+El frontend no confia ciegamente en el token guardado. Lo revalida.
 
-## 14. Verificacion realizada en el ambiente
+### Paso 7. Si hay token, se consulta el carrito
 
-Se comprobo lo siguiente:
+Otro `useEffect` tambien depende de `token`.
 
-- `Git` instalado correctamente.
-- `Visual Studio Code` instalado correctamente.
-- `Node.js` instalado correctamente en `C:\Program Files\nodejs\node.exe`.
-- `npm` disponible junto a Node.js.
-- `node_modules/` presente en `FRONTEND`, lo que confirma que `npm install` ya fue ejecutado.
-- El frontend responde en `http://127.0.0.1:5173` con estado `200`.
-- El backend paso sus pruebas automaticas con `26 tests OK`.
+Si existe:
 
-Tambien se detecto una observacion importante:
+- llama a `/cars/`
+- suma `cantidad` de cada item
+- actualiza `cartCount`
 
-- algunas terminales abiertas antes de instalar Node.js pueden no reconocer `node` o `npm` hasta que se cierren y se vuelvan a abrir.
-- en este ambiente fue necesario refrescar temporalmente el `PATH` para ciertos comandos nuevos.
+Esto alimenta el contador del carrito del header.
 
-## 15. Estado actual del proyecto
+### Paso 8. Se activan efectos de UI
 
-En la ultima actualizacion funcional:
+Hay otros `useEffect` que no piden datos al backend, pero si controlan el comportamiento visual:
 
-- el frontend compila correctamente con `npm run build`,
-- el dialogo de registro ya no se sale del viewport,
-- el flujo de registro y verificacion quedo conectado con el backend,
-- el encabezado muestra el usuario autenticado con menu de cuenta,
-- el backend necesita estar levantado en `http://127.0.0.1:8000` para login y registro reales.
+- cerrar drawer si la pantalla deja de ser movil,
+- bloquear scroll del `body` si el drawer o el dialogo estan abiertos,
+- cerrar el menu de perfil al hacer click afuera o pulsar `Escape`.
 
-Si el backend no tiene SMTP configurado, el codigo de verificacion se toma desde `BACKEND/tmp/emails`.
+Esto tambien es logica frontend importante, aunque no toque la API.
 
-## 16. Pasos para retomar el proyecto
+### Paso 9. React re-renderiza
 
-### Levantar frontend
+Cada vez que un `setState` cambia algo:
 
-1. Abrir PowerShell.
-2. Ir a la carpeta `FRONTEND`.
-3. Ejecutar `npm run dev`.
+- React vuelve a renderizar,
+- la UI refleja el nuevo estado.
 
-### Levantar backend
+Este es el motor real de React.
 
-1. Abrir PowerShell.
-2. Ir a la carpeta `BACKEND`.
-3. Activar el entorno virtual.
-4. Ejecutar `uvicorn app.main:app --reload`.
+La pantalla no se actualiza por "magia".
+Se actualiza porque cambian estados.
 
-### Verificaciones utiles
+## 14. Flujo de interaccion despues de cargar la pagina
 
-- `git --version`
-- `code --version`
-- `node -v`
-- `npm -v`
-- `http://127.0.0.1:5173`
-- `http://127.0.0.1:8000/health`
+Aqui empieza la parte dinamica.
 
-## 17. Como actualizar esta documentacion en el futuro
+### Caso 1. El usuario filtra por categoria
 
-La documentacion fuente esta en:
+Que pasa:
 
-- `FRONTEND/frontend_explicacion.md`
+1. cambia el `select`,
+2. se actualiza `selectedCategoryId`,
+3. React recalcula `filteredCourses`,
+4. `CourseList` recibe menos o mas cursos.
 
-Y el documento Word se genera con:
+Importante:
 
-- `FRONTEND/generate_frontend_docx.py`
+- no se hace llamada nueva al backend;
+- el filtro es local, en memoria.
 
-Si en el futuro cambias la arquitectura, agregas nuevas paginas, nuevas rutas o nuevos servicios, solo tienes que:
+### Caso 2. El usuario escribe en la busqueda
 
-1. editar el archivo Markdown,
-2. ejecutar el script Python,
-3. regenerar el `.docx`.
+Que pasa:
 
-Asi podras mantener una documentacion viva y facil de actualizar.
+1. al escribir, cambia `searchDraft`,
+2. al enviar el formulario, `searchDraft` se copia a `searchTerm`,
+3. `filteredCourses` usa `searchTerm`,
+4. la lista se actualiza.
 
-## 18. Conclusion
+Importante:
 
-El frontend creado no es solo una plantilla de inicio. Es una base practica para una plataforma educativa conectada con FastAPI.
+- la busqueda tambien es local;
+- no existe aun una busqueda remota contra backend.
 
-Lo mas importante de entender es esta separacion:
+### Caso 3. El usuario abre el menu movil
 
-- `components` para interfaz,
-- `services` para llamadas a la API,
-- `lib` para utilidades base,
-- `types` para contratos,
-- `App.tsx` como coordinador inicial.
+Que pasa:
 
-Si entiendes esa estructura, podras extender el proyecto con mucha mas seguridad y orden.
+1. cambia `isMenuOpen`,
+2. aparece el drawer,
+3. se bloquea scroll del `body`,
+4. el backdrop permite cerrarlo.
 
-## 19. Gestion de assets heredados
+### Caso 4. El usuario abre el dialogo de autenticacion
 
-El material del curso incluye CSS, JS, imagenes y sonidos heredados de un template.
+Que pasa:
 
-Despues de revisar ese material, se aplico una decision importante:
+1. `openAuthDialog` limpia errores anteriores,
+2. define si abre en `login` o `register`,
+3. abre el dialogo,
+4. si es registro, pide un reto humano al backend.
 
-- no cargar globalmente en `index.html` el CSS heredado por defecto,
-- usar primero los recursos ya confirmados dentro de `src/assets/images/` y `src/assets/sonidos/`,
-- dejar `src/assets/assets1/` como repositorio de apoyo para integrar partes concretas mas adelante.
+### Caso 5. Login desde dialogo o panel lateral
 
-Esta decision se tomo porque el CSS heredado referencia imagenes que no estaban completas en las rutas esperadas y podia contaminar la interfaz React actual.
+Que pasa:
 
-Los recursos aprovechables quedaron inventariados en:
+1. el usuario envia email y password,
+2. `handleLogin` llama `login()` del servicio,
+3. si sale bien, `handleAuthSuccess`:
+   - guarda token,
+   - actualiza `token`,
+   - actualiza `user`,
+   - cierra dialogo y menus,
+   - limpia mensajes de registro
+4. luego los efectos dependientes de `token` cargan sesion y carrito.
 
-- `src/assets/README.md`
+Lo mas importante:
 
-## 20. Estado del encabezado actual
+- el login visible puede venir de dos componentes distintos,
+- pero la logica real vive en un solo lugar: `App.tsx`.
 
-El encabezado fue redisenado para cumplir una funcion de layout global moderna.
+### Caso 6. Registro en dos pasos
 
-Estructura:
+El flujo del registro es mas interesante y debes estudiarlo con calma.
 
-1. parte superior izquierda con logo y nombre de la academia,
-2. segunda fila con navegacion funcional.
+#### Fase A. Preparacion
 
-Elementos visibles actuales:
+Al abrir `Registrate`:
 
-- categorias con selector,
-- buscador de cursos con icono de lupa,
-- acceso a `Mi aprendizaje`,
-- carrito con contador,
-- `Iniciar sesion`,
-- `Registrate`,
-- bloque de usuario autenticado con avatar e iniciales cuando la sesion esta activa.
+- el frontend pide `GET /auth/register/challenge`
 
-Decisiones aplicadas:
+Eso devuelve un reto humano.
 
-- el branding se mantiene arriba a la izquierda,
-- los controles inferiores comparten altura visual,
-- el carrito usa datos reales si hay token,
-- en movil el menu se mueve a un drawer lateral,
-- el bloque del usuario abre una lista con opcion de cerrar sesion,
-- se evita cargar elementos heredados del curso que aun no estan conectados.
+#### Fase B. Solicitud de codigo
 
-## 21. Memoria operativa
+Cuando el usuario envia el formulario:
 
-Para retomar rapidamente el proyecto en futuras sesiones, el estado actual tambien se resume en:
+- `AuthDialog` valida password repetida y consentimiento,
+- `App.tsx` envia `POST /auth/register/request-code`
 
-- `PROJECT_MEMORY.md`
+Si sale bien:
+
+- se guarda `pendingRegistrationEmail`,
+- se muestra mensaje de exito,
+- se refresca el reto humano.
+
+#### Fase C. Verificacion final
+
+Cuando el usuario escribe el codigo:
+
+- `App.tsx` llama `POST /auth/register/verify`
+
+Si sale bien:
+
+- el backend devuelve token + usuario,
+- `handleAuthSuccess` trata el resultado igual que un login correcto.
+
+Lo mas importante:
+
+- el registro NO crea sesion completa hasta que el codigo se verifica.
+
+### Caso 7. Menu de perfil
+
+Si hay usuario autenticado:
+
+- el header muestra iniciales,
+- nombre resumido,
+- caret,
+- dropdown con `Cerrar sesion`.
+
+Ademas, el menu se cierra si:
+
+- haces click fuera,
+- pulsas `Escape`.
+
+Aqui debes aprender el uso de `useRef` para detectar click externo.
+
+### Caso 8. Logout
+
+Que pasa:
+
+1. se borra token de `localStorage`,
+2. `token` pasa a `null`,
+3. `user` pasa a `null`,
+4. menus se cierran,
+5. el efecto del carrito lo resetea a `0`.
+
+## 15. Lo que hoy NO existe todavia
+
+Tambien es importante entender lo que aun no esta implementado.
+
+- No hay `React Router`.
+- No hay paginas separadas por URL.
+- `Mi aprendizaje` aun no navega a una vista real.
+- `Carrito` aun no abre una pantalla real.
+- Muchos servicios y tipos ya existen, pero esperan futuras vistas.
+
+Esto no es un fallo. Es el punto actual del proyecto.
+
+## 16. Los archivos mas importantes para estudiar en orden
+
+Si quieres aprender este frontend de verdad, sigue este orden:
+
+1. `src/main.tsx`
+2. `src/App.tsx`
+3. `src/components/Topbar.tsx`
+4. `src/components/CatalogFilters.tsx`
+5. `src/components/HeroSection.tsx`
+6. `src/components/AuthDialog.tsx`
+7. `src/lib/api.ts`
+8. `src/lib/storage.ts`
+9. `src/lib/user.ts`
+10. `src/services/auth.ts`
+11. `src/services/catalog.ts`
+12. `src/services/carrito.ts`
+13. `src/components/LoginForm.tsx`
+14. `src/components/UserPanel.tsx`
+15. `src/components/CourseList.tsx`
+16. `src/types/auth.ts`
+17. `src/types/user.ts`
+18. `src/types/course.ts`
+19. `src/styles.css`
+
+## 17. Lo que debes aprender para entender bien el funcionamiento
+
+Si yo tuviera que decirte que estudiar si o si, seria esto:
+
+### React basico
+
+- componentes,
+- props,
+- estado con `useState`,
+- efectos con `useEffect`,
+- referencias con `useRef`,
+- render condicional.
+
+### Flujo de datos
+
+- como un hijo recibe datos del padre,
+- como un hijo dispara una accion del padre mediante callbacks.
+
+### Formularios controlados
+
+- cada input tiene su valor ligado a estado.
+
+### Servicios HTTP
+
+- separar `fetch` de la UI,
+- centralizar errores,
+- manejar token.
+
+### TypeScript
+
+- entender tipos de entrada y salida,
+- identificar `null`,
+- usar contratos por dominio.
+
+### Estado de sesion
+
+- token en `localStorage`,
+- revalidacion con `/auth/me`,
+- cierre de sesion limpio.
+
+### Responsive
+
+- drawer movil,
+- bloqueo de scroll,
+- menu que reacciona al viewport.
+
+## 18. Errores comunes al leer este proyecto
+
+### Error 1. Pensar que `dist/` es la pagina activa en desarrollo
+
+No. En `npm run dev`, Vite trabaja sobre `src/`.
+
+### Error 2. Pensar que el HTML vive repartido en muchos archivos
+
+No. React pinta casi todo desde `App.tsx` y sus componentes.
+
+### Error 3. Pensar que cada click habla con el backend
+
+No siempre.
+
+Ejemplos:
+
+- filtro de categoria: local
+- busqueda: local
+- abrir drawer: local
+- abrir dropdown: local
+
+### Error 4. Pensar que `AuthDialog` contiene toda la logica de autenticacion
+
+No.
+
+`AuthDialog` contiene mucha UI y validacion local, pero la coordinacion importante sigue en `App.tsx`.
+
+### Error 5. Pensar que ya existe navegacion real
+
+No. Aun no hay router.
+
+### Error 6. Pensar que todos los assets heredados ya estan integrados
+
+No. Muchos recursos estan guardados para uso futuro.
+
+## 19. Resumen final como profesor
+
+Si quieres entender este frontend de verdad, no memorices archivos sueltos. Entiende la arquitectura.
+
+La arquitectura actual dice:
+
+- una sola pagina principal,
+- `App.tsx` como orquestador,
+- componentes para UI,
+- servicios para API,
+- utilidades para infraestructura,
+- tipos para contratos,
+- estilos globales para apariencia.
+
+Lo mas importante a retener es esto:
+
+1. el navegador entra por `index.html`,
+2. React arranca en `main.tsx`,
+3. la app vive en `App.tsx`,
+4. `App.tsx` pide datos y maneja la sesion,
+5. los componentes muestran esos datos,
+6. cada interaccion importante cambia estado,
+7. cuando cambia el estado, React vuelve a pintar.
+
+Si aprendes esa secuencia, ya no miraras el frontend como una caja negra. Empezaras a verlo como un sistema entendible.
+
+## 20. Siguiente paso recomendado para aprender aun mejor
+
+Despues de leer este documento, te recomiendo hacer este ejercicio practico:
+
+1. abrir `src/main.tsx`,
+2. abrir `src/App.tsx`,
+3. seguir cada `useState`,
+4. seguir cada `useEffect`,
+5. seguir cada handler importante,
+6. identificar que servicio llama,
+7. comprobar que estado cambia,
+8. ver que componente usa ese estado.
+
+Ese ejercicio te va a dar mucho mas dominio que solo leer por encima.

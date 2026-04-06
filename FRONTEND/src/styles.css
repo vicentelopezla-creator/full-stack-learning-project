@@ -903,8 +903,15 @@ code {
 }
 
 .topbar__cart-icon {
+  display: inline-flex;
+  align-items: center;
   font-size: 1.18rem;
   line-height: 1;
+}
+
+.topbar__cart-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 
 .topbar__cart-count {
@@ -1446,5 +1453,23 @@ code {
   .user-card > div {
     width: 100%;
     min-width: 0;
+  }
+}
+
+.topbar__label--featured::before {
+  content: '\25C9';
+}
+
+.topbar__link--learning::before {
+  content: '\25A3';
+}
+
+.topbar__link--session::before {
+  content: '\25CE';
+}
+
+@media (max-width: 1024px) {
+  .topbar__mobile-item::after {
+    content: '\203A';
   }
 }

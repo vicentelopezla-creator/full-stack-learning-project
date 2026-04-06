@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import type { AuthDialogMode, RegistrationChallenge } from '../types/auth';
+import type { AuthDialogMode, RegistrationChallenge, RegistrationFormValues } from '../types/auth';
 
 type AuthDialogProps = {
   mode: AuthDialogMode;
@@ -14,14 +14,7 @@ type AuthDialogProps = {
   onClose: () => void;
   onModeChange: (mode: AuthDialogMode) => void;
   onLogin: (email: string, password: string) => Promise<void>;
-  onRequestRegistration: (payload: {
-    name: string;
-    surname: string;
-    email: string;
-    password: string;
-    consentAccepted: boolean;
-    humanAnswer: string;
-  }) => Promise<void>;
+  onRequestRegistration: (payload: RegistrationFormValues) => Promise<void>;
   onVerifyRegistration: (email: string, code: string) => Promise<void>;
 };
 
@@ -97,6 +90,7 @@ export function AuthDialog({
   }
 
   useEffect(() => {
+    // Dirigimos el foco al formulario activo para que el dialogo sea mas comodo al abrirse.
     const timeoutId = window.setTimeout(() => {
       if (mode === 'login') {
         loginInputRef.current?.focus();
@@ -168,6 +162,7 @@ export function AuthDialog({
       return;
     }
 
+    // Limpiamos ambos modos para que login y registro no compartan residuos visuales.
     setLocalRegisterError(null);
     resetLoginForm();
     resetRegistrationForm();
@@ -229,6 +224,7 @@ export function AuthDialog({
                 <input
                   ref={loginInputRef}
                   type="email"
+                  autoComplete="email"
                   value={loginEmail}
                   onChange={(event) => setLoginEmail(event.target.value)}
                   placeholder="tu-correo@ejemplo.com"
@@ -240,6 +236,7 @@ export function AuthDialog({
                 <span>Password</span>
                 <input
                   type="password"
+                  autoComplete="current-password"
                   value={loginPassword}
                   onChange={(event) => setLoginPassword(event.target.value)}
                   placeholder="Escribe tu password"
